@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Escolher Meu Carro</title>
+  <title>Custo de Reposição Automotiva no Brasil</title>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
@@ -258,9 +258,17 @@
       staticPlot: false
     };
 
-    function numeroBR(valor) {
+    function numeroBR(valor, tipo = "normal") {
       if (valor === null || valor === undefined || Number.isNaN(valor)) return "";
-      return Number(valor).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const v = Number(valor).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      if (tipo === "percentual") return v + "%";
+      if (tipo === "moeda") return "R$ " + v;
+      return v;
     }
 
     function unicoOrdenado(arr) {
@@ -341,7 +349,13 @@
 
       const x = ordenado.map(d => Number(d.periodo_meses));
       const y = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
-      const labels = y.map(numeroBR);
+      const tipoLabel =
+        coluna === "perc_fipe_0km_requerido_mes" ? "percentual" :
+        coluna === "valor_mensal_total_esperado" ? "moeda" :
+        coluna === "eer_calculada" ? "percentual" :
+        "normal";
+
+      const labels = y.map(v => numeroBR(v, tipoLabel));
       const maxY = Math.max(...y);
 
       const cores = coluna === "eer_calculada"
@@ -387,7 +401,13 @@
         if (d.veiculo !== ids.veiculo.value) return "lightgray";
         return coluna === "eer_calculada" ? corEER(Number(d[coluna])) : "#d71920";
       });
-      const labels = x.map(numeroBR);
+      const tipoLabel =
+        coluna === "perc_fipe_0km_requerido_mes" ? "percentual" :
+        coluna === "valor_mensal_total_esperado" ? "moeda" :
+        coluna === "eer_calculada" ? "percentual" :
+        "normal";
+
+      const labels = x.map(v => numeroBR(v, tipoLabel));
       const classes = ordenado.map(d => coluna === "eer_calculada" ? classeEER(Number(d[coluna])) : "");
 
       const trace = {
@@ -430,7 +450,7 @@
       const x = ordenado.map(d => Number(d.valor_mensal_total_esperado));
       const y = ordenado.map(d => d.uf);
       const cores = ordenado.map(d => d.uf === ids.uf.value ? "#d71920" : "lightgray");
-      const labels = x.map(numeroBR);
+      const labels = x.map(v => numeroBR(v, "moeda"));
 
       const trace = {
         type: "bar",
@@ -441,7 +461,7 @@
         textposition: "outside",
         marker: { color: cores },
         cliponaxis: false,
-        hovertemplate: "UF: %{y}<br>Custo mensal: R$ %{text}<extra></extra>"
+        hovertemplate: "UF: %{y}<br>Custo mensal: %{text}<extra></extra>"
       };
 
       const altura = Math.min(760, Math.max(520, 24 * ordenado.length));
@@ -473,7 +493,7 @@
 
       plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE 0 km requerido ao mês", "% da FIPE 0 km / mês", true);
       plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false);
-      plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER", false);
+      plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER (%)", false);
 
       const existePeriodo = dfVeic.some(d =>
         Number(d.periodo_meses) === periodo &&
@@ -493,7 +513,7 @@
 
       plotCategoria("grafico-fipe-categoria", dfCat, "perc_fipe_0km_requerido_mes", "% FIPE 0 km requerido ao mês", "% da FIPE 0 km / mês", true, false);
       plotCategoria("grafico-custo-categoria", dfCat, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false, false);
-      plotCategoria("grafico-eer-categoria", dfCat, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER", false, true);
+      plotCategoria("grafico-eer-categoria", dfCat, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER (%)", false, true);
 
       const dfEstados = dados.filter(d =>
         d.categoria === ids.categoria.value &&
