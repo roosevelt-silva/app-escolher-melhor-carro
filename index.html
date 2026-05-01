@@ -67,6 +67,12 @@
       padding-bottom: 8px;
     }
     h3 { margin-top: 20px; color: #243b53; }
+    .intro, .explica, .artigo-link { line-height: 1.55; color: #334e68; font-size: 0.98rem; }
+    .intro { background: #eef6ff; border-left: 5px solid var(--azul2); border-radius: 12px; padding: 16px; margin: 18px 0; }
+    .explica { margin: -4px 0 14px; }
+    .artigo-link { background: #f8fafc; border: 1px solid #d9e2ec; border-radius: 14px; padding: 18px; margin: 32px 0 18px; text-align: center; }
+    .artigo-link a { display: inline-block; margin-top: 8px; background: var(--azul); color: #fff; text-decoration: none; padding: 11px 16px; border-radius: 10px; font-weight: 700; }
+    .artigo-link a:hover { background: #155c9a; }
     .grafico {
       width: 100%;
       min-height: 410px;
@@ -107,6 +113,10 @@
   </header>
 
   <main>
+    <section class="intro">
+      <strong>Sobre esta ferramenta.</strong> Este site permite comparar, de forma simples, o custo econômico de troca de veículos em diferentes estados do Brasil. A análise considera o custo mensal estimado para substituir o veículo por um zero-quilômetro equivalente, o percentual mensal do valor FIPE consumido nessa reposição e a Eficiência Econômica de Reposição (EER). O objetivo é ajudar o usuário a responder duas perguntas práticas: <strong>qual veículo tem melhor desempenho econômico</strong> e <strong>qual período de troca parece mais vantajoso</strong>.
+    </section>
+
     <section class="painel">
       <div class="filtros">
         <div>
@@ -130,18 +140,23 @@
 
     <section>
       <h2>1. Melhor período para o veículo selecionado</h2>
+      <p class="explica">Estes três gráficos mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A ideia central é identificar em qual prazo o custo mensal se dilui melhor e em qual período a EER se torna mais favorável. Em geral, períodos muito curtos concentram mais depreciação; ciclos intermediários tendem a mostrar melhor equilíbrio entre custo e reposição.</p>
       <h3>% FIPE 0 km requerido ao mês</h3>
+      <p class="explica">Indica qual fração do valor FIPE do veículo zero-quilômetro precisa ser provisionada por mês para viabilizar a troca ao final do período. Quanto menor esse percentual, maior tende a ser a eficiência econômica do veículo naquele ciclo.</p>
       <div id="grafico-fipe-periodos" class="grafico"></div>
 
       <h3>Custo mensal estimado</h3>
+      <p class="explica">Mostra o valor mensal em reais associado à troca do veículo no período escolhido. Esse indicador traduz o impacto direto no orçamento, incorporando depreciação e custos operacionais considerados no modelo.</p>
       <div id="grafico-custo-periodos" class="grafico"></div>
 
       <h3>Eficiência Econômica de Reposição - EER</h3>
+      <p class="explica">A EER sintetiza o equilíbrio entre custo mensal e valor de reposição. Valores maiores indicam melhor desempenho econômico relativo dentro do critério adotado, favorecendo veículos que combinam menor custo proporcional e menor custo absoluto.</p>
       <div id="grafico-eer-periodos" class="grafico"></div>
     </section>
 
     <section>
       <h2>2. Comparação com os demais veículos da categoria</h2>
+      <p class="explica">Nesta seção, o veículo selecionado é comparado com todos os demais modelos da mesma categoria e no mesmo estado. O veículo escolhido aparece destacado em vermelho. Essa comparação ajuda a entender se o modelo está entre os mais eficientes, intermediários ou menos vantajosos no período escolhido.</p>
       <section class="painel">
         <label for="periodo">Selecione o período para comparação</label>
         <select id="periodo"></select>
@@ -149,12 +164,15 @@
       <div id="aviso" class="aviso"></div>
 
       <h3>% FIPE 0 km requerido ao mês</h3>
+      <p class="explica">Compara o custo proporcional dos veículos da categoria. É útil para avaliar eficiência independentemente do preço absoluto do carro.</p>
       <div id="grafico-fipe-categoria" class="grafico"></div>
 
       <h3>Custo mensal estimado</h3>
+      <p class="explica">Compara o impacto financeiro mensal em reais. Dois veículos podem ter eficiência percentual semelhante, mas custos absolutos muito diferentes quando pertencem a faixas de preço distintas.</p>
       <div id="grafico-custo-categoria" class="grafico"></div>
 
       <h3>Eficiência Econômica de Reposição - EER</h3>
+      <p class="explica">Mostra o posicionamento final do veículo frente aos concorrentes da categoria. Quanto maior a EER, melhor o equilíbrio econômico entre custo mensal, valor de reposição e desempenho relativo.</p>
       <div id="grafico-eer-categoria" class="grafico"></div>
     </section>
 
@@ -162,16 +180,20 @@
 
     <section>
       <h2>3. Custo do veículo selecionado nos diferentes estados</h2>
-      <p style="color:#52606d; margin-top:-6px;">
-        Comparação do custo mensal estimado do mesmo veículo, no período selecionado, em todas as UFs disponíveis.
-        A UF selecionada nos filtros é destacada em vermelho.
-      </p>
+      <p class="explica">Este gráfico mostra como o custo mensal do mesmo veículo varia entre as unidades federativas no período selecionado. A diferença regional decorre principalmente das regras e alíquotas de IPVA, além de efeitos associados ao custo total estimado. A UF escolhida nos filtros aparece destacada em vermelho.</p>
       <h3>Custo mensal estimado por UF</h3>
       <div id="grafico-custo-estados" class="grafico"></div>
     </section>
 
+    <section class="artigo-link">
+      <strong>Quer ver a metodologia e a discussão completa?</strong><br>
+      Acesse o artigo integral com a descrição dos indicadores, critérios de custo e interpretação dos resultados.
+      <br>
+      <a href="artigo/artigo_completo.pdf" target="_blank" rel="noopener noreferrer">Abrir artigo na íntegra</a>
+    </section>
+
     <div class="rodape">
-      Dados consolidados a partir das planilhas por UF. Valores percentuais são apresentados em %.
+      Dados consolidados a partir das planilhas por UF. Valores percentuais são apresentados em %. Esta ferramenta é uma visualização interativa dos resultados do estudo.
     </div>
   </main>
 
