@@ -656,6 +656,7 @@
       }
       preencherSelect(ids.periodo, unicoOrdenado(dados.map(d => d.periodo_meses)).sort((a, b) => Number(a) - Number(b)));
       atualizarGraficos();
+      ids.periodo.value = "24"; // Define 24 meses como padrão
     }
 
     function atualizarGraficos() {
