@@ -82,6 +82,10 @@
       padding: 8px;
       background: white;
     }
+    .js-plotly-plot, .plot-container, .svg-container {
+      touch-action: pan-y !important;
+    }
+
     .aviso {
       background: #fff4e5;
       border: 1px solid #f0b429;
@@ -245,6 +249,15 @@
       aviso: document.getElementById("aviso")
     };
 
+    const plotConfig = {
+      responsive: true,
+      displayModeBar: false,
+      scrollZoom: false,
+      doubleClick: false,
+      editable: false,
+      staticPlot: false
+    };
+
     function numeroBR(valor) {
       if (valor === null || valor === undefined || Number.isNaN(valor)) return "";
       return Number(valor).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -280,11 +293,12 @@
         title: { text: titulo, font: { size: 17 } },
         height: altura,
         margin: { l: 70, r: 40, t: 70, b: 65 },
-        xaxis: { title: eixoX, automargin: true },
-        yaxis: { title: eixoY, automargin: true },
+        xaxis: { title: eixoX, automargin: true, fixedrange: true },
+        yaxis: { title: eixoY, automargin: true, fixedrange: true },
         font: { family: "Arial, sans-serif", size: 12 },
         paper_bgcolor: "white",
-        plot_bgcolor: "white"
+        plot_bgcolor: "white",
+        dragmode: false
       };
     }
 
@@ -353,7 +367,7 @@
       layout.xaxis.tickmode = "array";
       layout.xaxis.tickvals = [12, 24, 36, 48, 60];
       layout.yaxis.range = [0, maxY * 1.22];
-      Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
+      Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
     function plotCategoria(divId, df, coluna, titulo, eixoX, percentual = false, maiorMelhor = false) {
@@ -397,7 +411,7 @@
       layout.margin.r = 70;
       layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 } };
       layout.xaxis.range = [0, Math.max(...x) * 1.22];
-      Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
+      Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
 
@@ -436,7 +450,7 @@
       layout.margin.r = 90;
       layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 } };
       layout.xaxis.range = [0, Math.max(...x) * 1.22];
-      Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
+      Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
     function atualizarFiltros(nivel) {
@@ -529,4 +543,3 @@
   </script>
 </body>
 </html>
-
