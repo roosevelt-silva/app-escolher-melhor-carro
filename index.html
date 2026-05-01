@@ -125,49 +125,6 @@
       line-height: 1.35;
     }
 
-    .metodologia-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 14px;
-  margin: 14px 0 24px;
-}
-
-.metodologia-card {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  background: linear-gradient(135deg, #f8fafc, #eef6ff);
-  border: 1px solid #d9e2ec;
-  border-left: 5px solid var(--azul2);
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: 0 2px 8px rgba(11, 58, 102, 0.06);
-}
-
-.metodologia-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--azul);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.15rem;
-  flex-shrink: 0;
-}
-
-.metodologia-card strong {
-  color: var(--azul);
-  font-size: 0.95rem;
-}
-
-.metodologia-card p {
-  margin: 4px 0 0;
-  font-size: 0.84rem;
-  line-height: 1.35;
-  color: #52606d;
-}
     @media (max-width: 800px) {
       header h1 { font-size: 1.55rem; }
       .filtros { grid-template-columns: 1fr; }
@@ -180,14 +137,14 @@
   <header>
     <h1>Custo de Reposição Automotiva no Brasil</h1>
     <p>Uma análise do custo de troca de veículos seminovos por zero km</p>
-        <div style="width:100%; margin: 10px 0 20px 0;">
-              <img src="img/banner_topo.png" 
-                    alt="Custo de reposição automotiva"
-                    style="width:100%; height:auto; display:block; border-radius:10px;">
-        </div>
-        <p style="font-size:0.5rem; color:#888; text-align:right; margin-top:5px;">
-              Imagem ilustrativa gerada por inteligência artificial, utilizada apenas para fins de comunicação visual.
-        </p>
+    <div style="width:100%; margin: 10px 0 20px 0;">
+      <img src="img/banner_topo.png" 
+        alt="Custo de reposição automotiva"
+        style="width:100%; height:auto; display:block; border-radius:10px;">
+    </div>
+    <p style="font-size:0.5rem; color:#888; text-align:right; margin-top:5px;">
+      Imagem ilustrativa gerada por inteligência artificial, utilizada apenas para fins de comunicação visual.
+    </p>
   </header>
 
   <main>
@@ -291,86 +248,19 @@
     <section>
       <h2>3. Custo do veículo selecionado nos diferentes estados</h2>
       <p class="explica">Este gráfico mostra como o custo mensal do mesmo veículo varia entre as unidades federativas no período selecionado. A diferença regional decorre principalmente das regras e alíquotas de IPVA, além de efeitos associados ao custo total estimado. A UF escolhida nos filtros aparece destacada em vermelho.</p>
+      <section class="painel">
+        <label for="periodo-estados">Selecione o período de troca para comparação entre estados</label>
+        <select id="periodo-estados"></select>
+      </section>
       <h3>Custo mensal estimado por UF</h3>
       <div id="grafico-custo-estados" class="grafico"></div>
     </section>
 
     </section>
-    <h3 style="margin-top:24px;">RESUMO METODOLÓGICO</h3>
-
-<p style="font-size:0.9rem; color:#52606d; margin-top:6px;">
-  Parâmetros principais utilizados nas estimativas do modelo:
-</p>
-
-<div class="metodologia-grid">
-
-  <div class="metodologia-card">
-    <div class="metodologia-icon">⛽</div>
-    <div>
-      <strong>Combustível</strong>
-      <p>Gasolina: R$ 6,50/L<br>Diesel: R$ 6,00/L</p>
-    </div>
-  </div>
-
-  <div class="metodologia-card">
-    <div class="metodologia-icon">🚗</div>
-    <div>
-      <strong>Uso médio</strong>
-      <p>20.000 km por ano</p>
-    </div>
-  </div>
-
-  <div class="metodologia-card">
-    <div class="metodologia-icon">🛡️</div>
-    <div>
-      <strong>Seguro</strong>
-      <p>Aproximadamente 1,5% ao ano do valor do veículo</p>
-    </div>
-  </div>
-
-  <div class="metodologia-card">
-    <div class="metodologia-icon">📊</div>
-    <div>
-      <strong>Depreciação</strong>
-      <p>Tabela FIPE<br>Referência: abril/2026</p>
-    </div>
-  </div>
-
-  <div class="metodologia-card">
-    <div class="metodologia-icon">🔧</div>
-    <div>
-      <strong>Custos operacionais</strong>
-      <p>IPVA (por estado), manutenção, revisões, pneus e combustível</p>
-    </div>
-  </div>
-
-  <div class="metodologia-card">
-    <div class="metodologia-icon">📅</div>
-    <div>
-      <strong>Ciclos analisados</strong>
-      <p>12, 24, 36, 48 e 60 meses</p>
-    </div>
-  </div>
-
-  <div class="metodologia-card">
-    <div class="metodologia-icon">🔁</div>
-    <div>
-      <strong>Reposição</strong>
-      <p>Custo mensal necessário para troca por veículo zero km</p>
-    </div>
-  </div>
-
-  <div class="metodologia-card">
-    <div class="metodologia-icon">📈</div>
-    <div>
-      <strong>Liquidez</strong>
-      <p>Incorporada por modelagem matemática com base no ranking de emplacamentos da FENABRAVE (acumulado de dezembro de 2025). </p>
-    </div>
-  </div>
-
-</div>
-    
-    
+    <h3 style="margin-top:20px;">RESUMO METODOLÓGICO</h3>
+    <p style="font-size:0.85rem; color:#52606d; margin-top:6px;">
+      As estimativas consideram uso médio de 20.000 km/ano, preços de combustível de R$ 6,50 (gasolina) e R$ 6,00 (diesel), custo de seguro de aproximadamente 1,5% ao ano do valor do veículo, além de IPVA com base em cada estado/tipo do veículo, manutenção/revisões pelas concessionárias e custo da troca de pneus. A depreciação é baseada na Tabela FIPE (referência: abril/2026), e o custo mensal de reposição é calculado para ciclos entre 12 e 60 meses, sendo a liquidez de mercado incorporada por meio de modelagem matemática.
+    </p>
     <section class="artigo-link">
       <strong>Quer ver a metodologia e a discussão completa?</strong><br>
       Acesse o artigo integral com a descrição dos indicadores, critérios de custo e interpretação dos resultados.
@@ -392,6 +282,7 @@
       marca: document.getElementById("marca"),
       veiculo: document.getElementById("veiculo"),
       periodo: document.getElementById("periodo"),
+      periodoEstados: document.getElementById("periodo-estados"),
       aviso: document.getElementById("aviso"),
       notaPeriodosVeiculo: document.getElementById("nota-periodos-veiculo"),
       notaPeriodosCategoria: document.getElementById("nota-periodos-categoria")
@@ -644,6 +535,12 @@
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
+    function definirPeriodoPadrao(select, valorPadrao = "24") {
+      if (select && [...select.options].some(opt => String(opt.value) === String(valorPadrao))) {
+        select.value = String(valorPadrao);
+      }
+    }
+
     function atualizarFiltros(nivel) {
       if (nivel <= 1) {
         preencherSelect(ids.categoria, unicoOrdenado(dados.filter(d => d.uf === ids.uf.value).map(d => d.categoria)));
@@ -654,14 +551,22 @@
       if (nivel <= 3) {
         preencherSelect(ids.veiculo, unicoOrdenado(dados.filter(d => d.uf === ids.uf.value && d.categoria === ids.categoria.value && d.marca === ids.marca.value).map(d => d.veiculo)));
       }
-      preencherSelect(ids.periodo, unicoOrdenado(dados.map(d => d.periodo_meses)).sort((a, b) => Number(a) - Number(b)));
+
+      const periodos = unicoOrdenado(dados.map(d => d.periodo_meses)).sort((a, b) => Number(a) - Number(b));
+      preencherSelect(ids.periodo, periodos);
+      preencherSelect(ids.periodoEstados, periodos);
+
+      definirPeriodoPadrao(ids.periodo, "24");
+      definirPeriodoPadrao(ids.periodoEstados, "24");
+
       atualizarGraficos();
-      ids.periodo.value = "24"; // Define 24 meses como padrão
     }
 
     function atualizarGraficos() {
       const dfVeic = filtrarBase();
       const periodo = Number(ids.periodo.value);
+      const periodoEstados = Number(ids.periodoEstados.value);
+
       const dfCatPeriodo = dados.filter(d =>
         d.uf === ids.uf.value &&
         d.categoria === ids.categoria.value &&
@@ -674,38 +579,62 @@
       plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false);
       plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER (%)", false);
 
-      const existePeriodo = dfVeic.some(d =>
+      const existePeriodoSecao2 = dfVeic.some(d =>
         Number(d.periodo_meses) === periodo &&
         (valorValido(d.perc_fipe_0km_requerido_mes) || valorValido(d.valor_mensal_total_esperado) || valorValido(d.eer_calculada))
       );
-      const divsCat = ["grafico-fipe-categoria", "grafico-custo-categoria", "grafico-eer-categoria", "grafico-custo-estados"];
 
-      if (!existePeriodo) {
+      const divsCat = ["grafico-fipe-categoria", "grafico-custo-categoria", "grafico-eer-categoria"];
+
+      if (!existePeriodoSecao2) {
         ids.aviso.style.display = "block";
         ids.aviso.textContent = `Não há estimativa disponível para ${ids.veiculo.value} no período de ${periodo} meses. Por isso, os gráficos comparativos não são exibidos.`;
         divsCat.forEach(id => Plotly.purge(id));
-        return;
+      } else {
+        ids.aviso.style.display = "none";
+        const dfCat = dfCatPeriodo;
+
+        plotCategoria(
+          "grafico-fipe-categoria",
+          dfCat,
+          "perc_fipe_0km_requerido_mes",
+          `% FIPE 0 km requerido ao mês (${periodo} meses)`,
+          "% da FIPE 0 km / mês",
+          true,
+          false
+        );
+        plotCategoria(
+          "grafico-custo-categoria",
+          dfCat,
+          "valor_mensal_total_esperado",
+          `Custo mensal estimado (${periodo} meses)`,
+          "R$ por mês",
+          false,
+          false
+        );
+        plotCategoria(
+          "grafico-eer-categoria",
+          dfCat,
+          "eer_calculada",
+          `Eficiência Econômica de Reposição - EER (${periodo} meses)`,
+          "EER (%)",
+          false,
+          true
+        );
       }
-
-      ids.aviso.style.display = "none";
-      const dfCat = dfCatPeriodo;
-
-      plotCategoria("grafico-fipe-categoria", dfCat, "perc_fipe_0km_requerido_mes", "% FIPE 0 km requerido ao mês", "% da FIPE 0 km / mês", true, false);
-      plotCategoria("grafico-custo-categoria", dfCat, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false, false);
-      plotCategoria("grafico-eer-categoria", dfCat, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER (%)", false, true);
 
       const dfEstados = dados.filter(d =>
         d.categoria === ids.categoria.value &&
         d.veiculo === ids.veiculo.value &&
-        d.periodo_meses === periodo
+        d.periodo_meses === periodoEstados
       );
+
       plotEstados(
         "grafico-custo-estados",
         dfEstados,
-        `Custo mensal estimado por UF<br>${ids.veiculo.value} (${periodo} meses)`,
+        `Custo mensal estimado por UF<br>${ids.veiculo.value} (${periodoEstados} meses)`,
         "R$ por mês"
       );
-
     }
 
     ids.uf.addEventListener("change", () => atualizarFiltros(1));
@@ -713,6 +642,7 @@
     ids.marca.addEventListener("change", () => atualizarFiltros(3));
     ids.veiculo.addEventListener("change", atualizarGraficos);
     ids.periodo.addEventListener("change", atualizarGraficos);
+    ids.periodoEstados.addEventListener("change", atualizarGraficos);
     window.addEventListener("resize", () => atualizarGraficos());
 
     Papa.parse("data/veiculos_brasil_tidy.csv", {
@@ -732,18 +662,27 @@
           }));
 
         preencherSelect(ids.uf, unicoOrdenado(dados.map(d => d.uf)));
-        // Define UF padrão = SP
+
+        // Padrões iniciais da ferramenta
         if ([...ids.uf.options].some(opt => opt.value === "SP")) {
           ids.uf.value = "SP";
         }
-        // Atualiza categorias com base em SP
-        atualizarFiltros(1);
-        // Define categoria padrão = SUV
+
+        preencherSelect(ids.categoria, unicoOrdenado(dados.filter(d => d.uf === ids.uf.value).map(d => d.categoria)));
         if ([...ids.categoria.options].some(opt => opt.value === "SUVs")) {
           ids.categoria.value = "SUVs";
         }
-        // Atualiza marcas e veículos após escolher SUV
-        atualizarFiltros(1);
+
+        preencherSelect(ids.marca, unicoOrdenado(dados.filter(d => d.uf === ids.uf.value && d.categoria === ids.categoria.value).map(d => d.marca)));
+        preencherSelect(ids.veiculo, unicoOrdenado(dados.filter(d => d.uf === ids.uf.value && d.categoria === ids.categoria.value && d.marca === ids.marca.value).map(d => d.veiculo)));
+
+        const periodos = unicoOrdenado(dados.map(d => d.periodo_meses)).sort((a, b) => Number(a) - Number(b));
+        preencherSelect(ids.periodo, periodos);
+        preencherSelect(ids.periodoEstados, periodos);
+        definirPeriodoPadrao(ids.periodo, "24");
+        definirPeriodoPadrao(ids.periodoEstados, "24");
+
+        atualizarGraficos();
       },
       error: function(err) {
         alert("Erro ao carregar o CSV. Confira se o arquivo está em data/veiculos_brasil_tidy.csv");
