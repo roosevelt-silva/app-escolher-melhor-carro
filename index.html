@@ -260,6 +260,29 @@
       return valorValido(v) ? Number(v) : null;
     }
 
+
+    function corEER(valor) {
+      const v = Number(valor);
+      if (!Number.isFinite(v)) return "lightgray";
+      if (v >= 90) return "#4B0082";   // Excelente - roxo
+      if (v >= 80) return "#08519C";   // Muito bom - azul escuro
+      if (v >= 70) return "#3182BD";   // Bom - azul
+      if (v >= 60) return "#FDD049";   // Regular - amarelo
+      if (v >= 50) return "#F28E2B";   // Baixo - laranja
+      return "#D71920";                // Muito baixo - vermelho
+    }
+
+    function classeEER(valor) {
+      const v = Number(valor);
+      if (!Number.isFinite(v)) return "Sem dados";
+      if (v >= 90) return "Excelente";
+      if (v >= 80) return "Muito bom";
+      if (v >= 70) return "Bom";
+      if (v >= 60) return "Regular";
+      if (v >= 50) return "Baixo";
+      return "Muito baixo";
+    }
+
     function plotPeriodos(divId, df, coluna, titulo, eixoY, percentual = false) {
       const ordenado = [...df]
         .filter(d => valorValido(d.periodo_meses) && valorValido(d[coluna]))
@@ -276,14 +299,26 @@
       const labels = y.map(numeroBR);
       const maxY = Math.max(...y.filter(valorValido));
 
+      const cores = coluna === "eer_calculada"
+        ? ordenado.map(d => corEER(Number(d[coluna])))
+        : "#1f77b4";
+
+      const hover = coluna === "eer_calculada"
+        ? ordenado.map(d => `${classeEER(Number(d[coluna]))}`)
+        : labels;
+
       const trace = {
         type: "bar",
         x,
         y,
         text: labels,
         textposition: "outside",
-        marker: { color: "#1f77b4" },
-        cliponaxis: false
+        marker: { color: cores },
+        cliponaxis: false,
+        customdata: hover,
+        hovertemplate: coluna === "eer_calculada"
+          ? "Período: %{x} meses<br>EER: %{text}<br>Classe: %{customdata}<extra></extra>"
+          : "Período: %{x} meses<br>Valor: %{text}<extra></extra>"
       };
       const layout = layoutBase(titulo, "Período de troca (meses)", eixoY, 420);
       layout.xaxis.tickmode = "array";
@@ -305,8 +340,12 @@
 
       const x = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
       const y = ordenado.map(d => d.veiculo);
-      const cores = ordenado.map(d => d.veiculo === ids.veiculo.value ? "#d71920" : "lightgray");
+      const cores = ordenado.map(d => {
+        if (d.veiculo !== ids.veiculo.value) return "lightgray";
+        return coluna === "eer_calculada" ? corEER(Number(d[coluna])) : "#d71920";
+      });
       const labels = x.map(numeroBR);
+      const classes = ordenado.map(d => coluna === "eer_calculada" ? classeEER(Number(d[coluna])) : "");
 
       const trace = {
         type: "bar",
@@ -317,7 +356,10 @@
         textposition: "outside",
         marker: { color: cores },
         cliponaxis: false,
-        hovertemplate: "%{y}<br>Valor: %{text}<extra></extra>"
+        customdata: classes,
+        hovertemplate: coluna === "eer_calculada"
+          ? "%{y}<br>EER: %{text}<br>Classe: %{customdata}<extra></extra>"
+          : "%{y}<br>Valor: %{text}<extra></extra>"
       };
 
       const altura = Math.min(680, Math.max(420, 27 * ordenado.length));
@@ -458,4 +500,5 @@
   </script>
 </body>
 </html>
+
 
