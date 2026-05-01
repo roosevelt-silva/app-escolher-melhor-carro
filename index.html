@@ -252,13 +252,33 @@
       };
     }
 
+    function valorValido(v) {
+      return v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v));
+    }
+
+    function toNumeroOuNull(v) {
+      return valorValido(v) ? Number(v) : null;
+    }
+
     function plotPeriodos(divId, df, coluna, titulo, eixoY, percentual = false) {
-      const ordenado = [...df].sort((a, b) => a.periodo_meses - b.periodo_meses);
-      const y = ordenado.map(d => percentual ? d[coluna] * 100 : d[coluna]);
+      const ordenado = [...df]
+        .filter(d => valorValido(d.periodo_meses) && valorValido(d[coluna]))
+        .sort((a, b) => Number(a.periodo_meses) - Number(b.periodo_meses));
+
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este indicador.</div>';
+        return;
+      }
+
+      const x = ordenado.map(d => Number(d.periodo_meses));
+      const y = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
       const labels = y.map(numeroBR);
+      const maxY = Math.max(...y.filter(valorValido));
+
       const trace = {
         type: "bar",
-        x: ordenado.map(d => d.periodo_meses),
+        x,
         y,
         text: labels,
         textposition: "outside",
@@ -268,15 +288,22 @@
       const layout = layoutBase(titulo, "Período de troca (meses)", eixoY, 420);
       layout.xaxis.tickmode = "array";
       layout.xaxis.tickvals = [12, 24, 36, 48, 60];
-      layout.yaxis.range = [0, Math.max(...y, 0) * 1.22];
+      layout.yaxis.range = [0, maxY * 1.22];
       Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
     }
 
     function plotCategoria(divId, df, coluna, titulo, eixoX, percentual = false, maiorMelhor = false) {
-      let ordenado = [...df].sort((a, b) => a[coluna] - b[coluna]);
-      if (maiorMelhor) ordenado = [...df].sort((a, b) => b[coluna] - a[coluna]);
+      let ordenado = [...df].filter(d => valorValido(d[coluna]));
+      ordenado = ordenado.sort((a, b) => Number(a[coluna]) - Number(b[coluna]));
+      if (maiorMelhor) ordenado = ordenado.sort((a, b) => Number(b[coluna]) - Number(a[coluna]));
 
-      const x = ordenado.map(d => percentual ? d[coluna] * 100 : d[coluna]);
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este indicador.</div>';
+        return;
+      }
+
+      const x = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
       const y = ordenado.map(d => d.veiculo);
       const cores = ordenado.map(d => d.veiculo === ids.veiculo.value ? "#d71920" : "lightgray");
       const labels = x.map(numeroBR);
@@ -305,8 +332,17 @@
 
 
     function plotEstados(divId, df, titulo, eixoX) {
-      const ordenado = [...df].sort((a, b) => a.valor_mensal_total_esperado - b.valor_mensal_total_esperado);
-      const x = ordenado.map(d => d.valor_mensal_total_esperado);
+      const ordenado = [...df]
+        .filter(d => valorValido(d.valor_mensal_total_esperado))
+        .sort((a, b) => Number(a.valor_mensal_total_esperado) - Number(b.valor_mensal_total_esperado));
+
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este veículo no período selecionado.</div>';
+        return;
+      }
+
+      const x = ordenado.map(d => Number(d.valor_mensal_total_esperado));
       const y = ordenado.map(d => d.uf);
       const cores = ordenado.map(d => d.uf === ids.uf.value ? "#d71920" : "lightgray");
       const labels = x.map(numeroBR);
@@ -354,7 +390,10 @@
       plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false);
       plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER", false);
 
-      const existePeriodo = dfVeic.some(d => d.periodo_meses === periodo);
+      const existePeriodo = dfVeic.some(d =>
+        Number(d.periodo_meses) === periodo &&
+        (valorValido(d.perc_fipe_0km_requerido_mes) || valorValido(d.valor_mensal_total_esperado) || valorValido(d.eer_calculada))
+      );
       const divsCat = ["grafico-fipe-categoria", "grafico-custo-categoria", "grafico-eer-categoria", "grafico-custo-estados"];
 
       if (!existePeriodo) {
@@ -402,10 +441,10 @@
           .map(d => ({
             ...d,
             marca: String(d.veiculo).split(" ")[0],
-            periodo_meses: Number(d.periodo_meses),
-            perc_fipe_0km_requerido_mes: Number(d.perc_fipe_0km_requerido_mes),
-            valor_mensal_total_esperado: Number(d.valor_mensal_total_esperado),
-            eer_calculada: Number(d.eer_calculada)
+            periodo_meses: toNumeroOuNull(d.periodo_meses),
+            perc_fipe_0km_requerido_mes: toNumeroOuNull(d.perc_fipe_0km_requerido_mes),
+            valor_mensal_total_esperado: toNumeroOuNull(d.valor_mensal_total_esperado),
+            eer_calculada: toNumeroOuNull(d.eer_calculada)
           }));
 
         preencherSelect(ids.uf, unicoOrdenado(dados.map(d => d.uf)));
