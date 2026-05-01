@@ -699,13 +699,13 @@
         d.veiculo === ids.veiculo.value &&
         d.periodo_meses === periodo
       );
-
       plotEstados(
         "grafico-custo-estados",
         dfEstados,
-        `Custo mensal estimado por UF - ${ids.veiculo.value} (${periodo} meses)`,
+        `Custo mensal estimado por UF<br>${ids.veiculo.value} (${periodo} meses)`,
         "R$ por mês"
       );
+
     }
 
     ids.uf.addEventListener("change", () => atualizarFiltros(1));
