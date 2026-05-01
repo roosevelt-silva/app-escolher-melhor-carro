@@ -1,212 +1,461 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Escolher Meu Carro</title>
-
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-
-<style>
-body { font-family: Arial; margin:0; }
-header { background:#0b3a66; color:#fff; padding:20px; text-align:center; }
-main { padding:15px; max-width:1100px; margin:auto; }
-.grafico { margin:15px 0; }
-.explica { font-size:0.95rem; color:#333; }
-select { width:100%; padding:8px; margin-bottom:10px; }
-.legend { font-size:0.9rem; margin-top:10px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Escolher Meu Carro</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --azul: #0b3a66;
+      --azul2: #1f77b4;
+      --vermelho: #d71920;
+      --cinza: #f4f6f8;
+      --texto: #1f2933;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #ffffff;
+      color: var(--texto);
+    }
+    header {
+      background: linear-gradient(135deg, var(--azul), #155c9a);
+      color: white;
+      padding: 28px 18px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 8px; font-size: 2rem; }
+    header p { margin: 0; opacity: 0.95; }
+    main {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 18px;
+    }
+    .painel {
+      background: var(--cinza);
+      border: 1px solid #d9e2ec;
+      border-radius: 14px;
+      padding: 16px;
+      margin: 18px 0;
+    }
+    .filtros {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bcccdc;
+      border-radius: 9px;
+      background: white;
+      font-size: 0.95rem;
+    }
+    h2 {
+      margin-top: 26px;
+      color: var(--azul);
+      border-bottom: 2px solid #d9e2ec;
+      padding-bottom: 8px;
+    }
+    h3 { margin-top: 20px; color: #243b53; }
+    .intro, .explica, .artigo-link { line-height: 1.55; color: #334e68; font-size: 0.98rem; }
+    .intro { background: #eef6ff; border-left: 5px solid var(--azul2); border-radius: 12px; padding: 16px; margin: 18px 0; }
+    .explica { margin: -4px 0 14px; }
+    .artigo-link { background: #f8fafc; border: 1px solid #d9e2ec; border-radius: 14px; padding: 18px; margin: 32px 0 18px; text-align: center; }
+    .artigo-link a { display: inline-block; margin-top: 8px; background: var(--azul); color: #fff; text-decoration: none; padding: 11px 16px; border-radius: 10px; font-weight: 700; }
+    .artigo-link a:hover { background: #155c9a; }
+    .grafico {
+      width: 100%;
+      min-height: 410px;
+      margin: 10px 0 24px;
+      border: 1px solid #e4e7eb;
+      border-radius: 12px;
+      padding: 8px;
+      background: white;
+    }
+    .aviso {
+      background: #fff4e5;
+      border: 1px solid #f0b429;
+      color: #7c4700;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      margin: 12px 0;
+      display: none;
+    }
+    .rodape {
+      margin: 28px 0 10px;
+      font-size: 0.85rem;
+      color: #52606d;
+      text-align: center;
+    }
+    @media (max-width: 800px) {
+      header h1 { font-size: 1.55rem; }
+      .filtros { grid-template-columns: 1fr; }
+      main { padding: 12px; }
+      .grafico { min-height: 380px; padding: 2px; }
+    }
+  </style>
 </head>
-
 <body>
+  <header>
+    <h1>Escolher Meu Carro</h1>
+    <p>Análise econômica de troca de veículos por estado, categoria, marca e período.</p>
+  </header>
 
-<header>
-<h1>Escolher Meu Carro</h1>
-<p>Análise econômica de troca de veículos</p>
-</header>
+  <main>
+    <section class="intro">
+      <strong>Sobre esta ferramenta.</strong> Este site permite comparar, de forma simples, o custo econômico de troca de veículos em diferentes estados do Brasil. A análise considera o custo mensal estimado para substituir o veículo seminovo por um zero-quilômetro do mesmo modelo, o percentual mensal do valor FIPE consumido nessa reposição e a Eficiência Econômica de Reposição (EER).  São considerados nos índices os custos com seguro, IPVA, revisões/manutenções, pneus e combustível, além do montante necessário, distribuídos mensalmente, para viabilizar a reposição do veículo ao final de cada período. O objetivo é ajudar o usuário a responder duas perguntas práticas: <strong>qual veículo tem melhor desempenho econômico</strong> e <strong>qual período de troca parece mais vantajoso</strong>.
+    </section>
 
-<main>
+    <section class="painel">
+      <div class="filtros">
+        <div>
+          <label for="uf">Estado / UF</label>
+          <select id="uf"></select>
+        </div>
+        <div>
+          <label for="categoria">Categoria</label>
+          <select id="categoria"></select>
+        </div>
+        <div>
+          <label for="marca">Marca</label>
+          <select id="marca"></select>
+        </div>
+        <div>
+          <label for="veiculo">Veículo</label>
+          <select id="veiculo"></select>
+        </div>
+      </div>
+    </section>
 
-<p class="explica">
-Esta ferramenta permite comparar o custo econômico de troca de veículos considerando depreciação, custos operacionais e valor de reposição.
-</p>
+    <section>
+      <h2>1. Melhor período para o veículo selecionado</h2>
+      <p class="explica">Os três gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A ideia central é identificar em qual prazo o custo mensal se dilui melhor e em qual período a EER se torna mais favorável. Em geral, períodos muito curtos concentram mais depreciação; ciclos intermediários tendem a mostrar melhor equilíbrio entre custo e reposição.</p>
+      <h3>% FIPE 0 km requerido ao mês</h3>
+      <p class="explica">Indica qual fração do valor FIPE do veículo zero-quilômetro precisa ser provisionada por mês para viabilizar a troca ao final do período. Quanto menor esse percentual, a eficiência econômica do veículo naquele ciclo tende a ser melhor.</p>
+      <div id="grafico-fipe-periodos" class="grafico"></div>
 
-<h2>Filtros</h2>
-<select id="uf"></select>
-<select id="categoria"></select>
-<select id="marca"></select>
-<select id="veiculo"></select>
-<select id="periodo"></select>
+      <h3>Custo mensal estimado</h3>
+      <p class="explica">Mostra o valor mensal em reais associado à troca do veículo no período escolhido. Esse indicador traduz o impacto direto no orçamento, incorporando depreciação e custos operacionais considerados no modelo.</p>
+      <div id="grafico-custo-periodos" class="grafico"></div>
 
-<h2>1. Melhor período</h2>
+      <h3>Eficiência Econômica de Reposição - EER</h3>
+      <p class="explica">A EER sintetiza o equilíbrio entre custo mensal e valor de reposição. Valores maiores indicam melhor desempenho econômico relativo dentro do critério adotado, favorecendo veículos que combinam menor custo proporcional e menor custo absoluto.</p>
+      <div id="grafico-eer-periodos" class="grafico"></div>
+    </section>
 
-<div id="grafico-fipe-periodos" class="grafico"></div>
-<div id="grafico-custo-periodos" class="grafico"></div>
-<div id="grafico-eer-periodos" class="grafico"></div>
+    <section>
+      <h2>2. Comparação com os demais veículos da categoria</h2>
+      <p class="explica">Nesta seção, o veículo selecionado é comparado com todos os demais modelos da mesma categoria e no mesmo estado. O veículo escolhido aparece destacado em vermelho. Essa comparação ajuda a entender se o modelo está entre os mais eficientes, intermediários ou menos vantajosos no período escolhido.</p>
+      <section class="painel">
+        <label for="periodo">Selecione o período para comparação</label>
+        <select id="periodo"></select>
+      </section>
+      <div id="aviso" class="aviso"></div>
 
-<div class="legend">
-<strong>Classificação da EER:</strong><br>
-<span style="color:#1a9641;">■ Excelente</span>
-<span style="color:#66bd63;">■ Muito bom</span>
-<span style="color:#a6d96a;">■ Bom</span>
-<span style="color:#fdae61;">■ Regular</span>
-<span style="color:#f46d43;">■ Baixo</span>
-<span style="color:#d73027;">■ Muito baixo</span>
-</div>
+      <h3>% FIPE 0 km requerido ao mês</h3>
+      <p class="explica">Compara o custo proporcional dos veículos da categoria. É útil para avaliar eficiência independentemente do preço absoluto do carro.</p>
+      <div id="grafico-fipe-categoria" class="grafico"></div>
 
-<h2>2. Comparação</h2>
+      <h3>Custo mensal estimado</h3>
+      <p class="explica">Compara o impacto financeiro mensal em reais. Dois veículos podem ter eficiência percentual semelhante, mas custos absolutos muito diferentes quando pertencem a faixas de preço distintas.</p>
+      <div id="grafico-custo-categoria" class="grafico"></div>
 
-<div id="grafico-fipe-categoria" class="grafico"></div>
-<div id="grafico-custo-categoria" class="grafico"></div>
-<div id="grafico-eer-categoria" class="grafico"></div>
+      <h3>Eficiência Econômica de Reposição - EER</h3>
+      <p class="explica">Mostra o posicionamento final do veículo frente aos concorrentes da categoria. Quanto maior a EER, melhor o equilíbrio econômico entre custo mensal, valor de reposição e desempenho relativo.</p>
+      <div id="grafico-eer-categoria" class="grafico"></div>
+    </section>
 
-<div class="legend">
-<strong>Classificação da EER:</strong><br>
-<span style="color:#1a9641;">■ Excelente</span>
-<span style="color:#66bd63;">■ Muito bom</span>
-<span style="color:#a6d96a;">■ Bom</span>
-<span style="color:#fdae61;">■ Regular</span>
-<span style="color:#f46d43;">■ Baixo</span>
-<span style="color:#d73027;">■ Muito baixo</span>
-</div>
 
-<h2>3. Estados</h2>
-<div id="grafico-custo-estados" class="grafico"></div>
 
-<p>
-<a href="artigo/artigo_completo.pdf" target="_blank">
-Abrir artigo completo
-</a>
-</p>
+    <section>
+      <h2>3. Custo do veículo selecionado nos diferentes estados</h2>
+      <p class="explica">Este gráfico mostra como o custo mensal do mesmo veículo varia entre as unidades federativas no período selecionado. A diferença regional decorre principalmente das regras e alíquotas de IPVA, além de efeitos associados ao custo total estimado. A UF escolhida nos filtros aparece destacada em vermelho.</p>
+      <h3>Custo mensal estimado por UF</h3>
+      <div id="grafico-custo-estados" class="grafico"></div>
+    </section>
 
-</main>
+    <section class="artigo-link">
+      <strong>Quer ver a metodologia e a discussão completa?</strong><br>
+      Acesse o artigo integral com a descrição dos indicadores, critérios de custo e interpretação dos resultados.
+      <br>
+      <a href="artigo/artigo_completo.pdf" target="_blank" rel="noopener noreferrer">Abrir artigo na íntegra</a>
+    </section>
 
-<script>
+    <div class="rodape">
+      Dados consolidados a partir das planilhas por UF. Valores percentuais são apresentados em %. Esta ferramenta é uma visualização interativa dos resultados do estudo.
+    </div>
+  </main>
 
-let dados = [];
+  <script>
+    let dados = [];
 
-function corEER(v){
-  if(v >= 1.0) return "#1a9641";
-  if(v >= 0.9) return "#66bd63";
-  if(v >= 0.8) return "#a6d96a";
-  if(v >= 0.7) return "#fdae61";
-  if(v >= 0.6) return "#f46d43";
-  return "#d73027";
-}
+    const ids = {
+      uf: document.getElementById("uf"),
+      categoria: document.getElementById("categoria"),
+      marca: document.getElementById("marca"),
+      veiculo: document.getElementById("veiculo"),
+      periodo: document.getElementById("periodo"),
+      aviso: document.getElementById("aviso")
+    };
 
-function numero(v){
-  if(v==null || isNaN(v)) return "";
-  return v.toFixed(2).replace(".",",");
-}
-
-function plotPeriodos(df, coluna, id, percentual=false, usarCor=false){
-
-  let x=[], y=[], cores=[], textos=[];
-
-  df.sort((a,b)=>a.periodo_meses-b.periodo_meses);
-
-  df.forEach(d=>{
-    if(d[coluna]!==null && !isNaN(d[coluna])){
-      x.push(d.periodo_meses);
-      let val = percentual ? d[coluna]*100 : d[coluna];
-      y.push(val);
-      textos.push(numero(val));
-      cores.push(usarCor ? corEER(d.eer_calculada) : "#1f77b4");
+    function numeroBR(valor) {
+      if (valor === null || valor === undefined || Number.isNaN(valor)) return "";
+      return Number(valor).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
-  });
 
-  Plotly.newPlot(id,[{
-    type:"bar",
-    x:x,
-    y:y,
-    text:textos,
-    textposition:"outside",
-    marker:{color:cores}
-  }],{margin:{t:30}});
-}
-
-function plotCategoria(df, coluna, id, percentual=false, usarCor=false){
-
-  let x=[], y=[], cores=[], textos=[];
-
-  df.forEach(d=>{
-    let val = percentual ? d[coluna]*100 : d[coluna];
-    x.push(val);
-    y.push(d.veiculo);
-    textos.push(numero(val));
-
-    if(usarCor && d.veiculo===document.getElementById("veiculo").value){
-      cores.push(corEER(d.eer_calculada));
-    } else {
-      cores.push("lightgray");
+    function unicoOrdenado(arr) {
+      return [...new Set(arr.filter(v => v !== null && v !== undefined && v !== ""))].sort((a, b) => String(a).localeCompare(String(b), "pt-BR"));
     }
-  });
 
-  Plotly.newPlot(id,[{
-    type:"bar",
-    orientation:"h",
-    x:x,
-    y:y,
-    text:textos,
-    textposition:"outside",
-    marker:{color:cores}
-  }],{margin:{l:200}});
-}
+    function preencherSelect(select, valores) {
+      const valorAnterior = select.value;
+      select.innerHTML = "";
+      valores.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+      });
+      if (valores.includes(valorAnterior)) select.value = valorAnterior;
+    }
 
-function atualizar(){
+    function filtrarBase() {
+      return dados.filter(d =>
+        d.uf === ids.uf.value &&
+        d.categoria === ids.categoria.value &&
+        d.marca === ids.marca.value &&
+        d.veiculo === ids.veiculo.value
+      );
+    }
 
-  let uf=document.getElementById("uf").value;
-  let cat=document.getElementById("categoria").value;
-  let marca=document.getElementById("marca").value;
-  let veic=document.getElementById("veiculo").value;
-  let per=Number(document.getElementById("periodo").value);
+    function layoutBase(titulo, eixoX, eixoY, altura = 420) {
+      return {
+        title: { text: titulo, font: { size: 17 } },
+        height: altura,
+        margin: { l: 70, r: 40, t: 70, b: 65 },
+        xaxis: { title: eixoX, automargin: true },
+        yaxis: { title: eixoY, automargin: true },
+        font: { family: "Arial, sans-serif", size: 12 },
+        paper_bgcolor: "white",
+        plot_bgcolor: "white"
+      };
+    }
 
-  let dfV = dados.filter(d=>d.uf==uf && d.categoria==cat && d.marca==marca && d.veiculo==veic);
+    function valorValido(v) {
+      return v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v));
+    }
 
-  plotPeriodos(dfV,"perc_fipe_0km_requerido_mes","grafico-fipe-periodos",true,false);
-  plotPeriodos(dfV,"valor_mensal_total_esperado","grafico-custo-periodos",false,false);
-  plotPeriodos(dfV,"eer_calculada","grafico-eer-periodos",false,true);
+    function toNumeroOuNull(v) {
+      return valorValido(v) ? Number(v) : null;
+    }
 
-  let dfC = dados.filter(d=>d.uf==uf && d.categoria==cat && d.periodo_meses==per);
+    function plotPeriodos(divId, df, coluna, titulo, eixoY, percentual = false) {
+      const ordenado = [...df]
+        .filter(d => valorValido(d.periodo_meses) && valorValido(d[coluna]))
+        .sort((a, b) => Number(a.periodo_meses) - Number(b.periodo_meses));
 
-  plotCategoria(dfC,"perc_fipe_0km_requerido_mes","grafico-fipe-categoria",true,false);
-  plotCategoria(dfC,"valor_mensal_total_esperado","grafico-custo-categoria",false,false);
-  plotCategoria(dfC,"eer_calculada","grafico-eer-categoria",false,true);
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este indicador.</div>';
+        return;
+      }
 
-  let dfE = dados.filter(d=>d.veiculo==veic && d.periodo_meses==per);
+      const x = ordenado.map(d => Number(d.periodo_meses));
+      const y = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
+      const labels = y.map(numeroBR);
+      const maxY = Math.max(...y.filter(valorValido));
 
-  plotCategoria(dfE,"valor_mensal_total_esperado","grafico-custo-estados",false,false);
-}
+      const trace = {
+        type: "bar",
+        x,
+        y,
+        text: labels,
+        textposition: "outside",
+        marker: { color: "#1f77b4" },
+        cliponaxis: false
+      };
+      const layout = layoutBase(titulo, "Período de troca (meses)", eixoY, 420);
+      layout.xaxis.tickmode = "array";
+      layout.xaxis.tickvals = [12, 24, 36, 48, 60];
+      layout.yaxis.range = [0, maxY * 1.22];
+      Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
+    }
 
-Papa.parse("data/veiculos_brasil_tidy.csv",{
-download:true,
-header:true,
-dynamicTyping:true,
-complete:function(res){
+    function plotCategoria(divId, df, coluna, titulo, eixoX, percentual = false, maiorMelhor = false) {
+      let ordenado = [...df].filter(d => valorValido(d[coluna]));
+      ordenado = ordenado.sort((a, b) => Number(a[coluna]) - Number(b[coluna]));
+      if (maiorMelhor) ordenado = ordenado.sort((a, b) => Number(b[coluna]) - Number(a[coluna]));
 
-dados=res.data;
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este indicador.</div>';
+        return;
+      }
 
-let ufs=[...new Set(dados.map(d=>d.uf))];
+      const x = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
+      const y = ordenado.map(d => d.veiculo);
+      const cores = ordenado.map(d => d.veiculo === ids.veiculo.value ? "#d71920" : "lightgray");
+      const labels = x.map(numeroBR);
 
-ufs.forEach(u=>{
-let opt=new Option(u,u);
-document.getElementById("uf").add(opt);
-});
+      const trace = {
+        type: "bar",
+        orientation: "h",
+        x,
+        y,
+        text: labels,
+        textposition: "outside",
+        marker: { color: cores },
+        cliponaxis: false,
+        hovertemplate: "%{y}<br>Valor: %{text}<extra></extra>"
+      };
 
-document.getElementById("uf").onchange=atualizar;
-document.getElementById("categoria").onchange=atualizar;
-document.getElementById("marca").onchange=atualizar;
-document.getElementById("veiculo").onchange=atualizar;
-document.getElementById("periodo").onchange=atualizar;
+      const altura = Math.min(680, Math.max(420, 27 * ordenado.length));
+      const layout = layoutBase(titulo, eixoX, "", altura);
+      layout.margin.l = window.innerWidth < 800 ? 120 : 230;
+      layout.margin.r = 70;
+      layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 } };
+      layout.xaxis.range = [0, Math.max(...x, 0) * 1.22];
+      Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
+    }
 
-atualizar();
 
-}
-});
 
-</script>
+    function plotEstados(divId, df, titulo, eixoX) {
+      const ordenado = [...df]
+        .filter(d => valorValido(d.valor_mensal_total_esperado))
+        .sort((a, b) => Number(a.valor_mensal_total_esperado) - Number(b.valor_mensal_total_esperado));
 
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este veículo no período selecionado.</div>';
+        return;
+      }
+
+      const x = ordenado.map(d => Number(d.valor_mensal_total_esperado));
+      const y = ordenado.map(d => d.uf);
+      const cores = ordenado.map(d => d.uf === ids.uf.value ? "#d71920" : "lightgray");
+      const labels = x.map(numeroBR);
+
+      const trace = {
+        type: "bar",
+        orientation: "h",
+        x,
+        y,
+        text: labels,
+        textposition: "outside",
+        marker: { color: cores },
+        cliponaxis: false,
+        hovertemplate: "UF: %{y}<br>Custo mensal: R$ %{text}<extra></extra>"
+      };
+
+      const altura = Math.min(760, Math.max(520, 24 * ordenado.length));
+      const layout = layoutBase(titulo, eixoX, "UF", altura);
+      layout.margin.l = window.innerWidth < 800 ? 70 : 90;
+      layout.margin.r = 90;
+      layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 } };
+      layout.xaxis.range = [0, Math.max(...x, 0) * 1.22];
+      Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
+    }
+
+    function atualizarFiltros(nivel) {
+      if (nivel <= 1) {
+        preencherSelect(ids.categoria, unicoOrdenado(dados.filter(d => d.uf === ids.uf.value).map(d => d.categoria)));
+      }
+      if (nivel <= 2) {
+        preencherSelect(ids.marca, unicoOrdenado(dados.filter(d => d.uf === ids.uf.value && d.categoria === ids.categoria.value).map(d => d.marca)));
+      }
+      if (nivel <= 3) {
+        preencherSelect(ids.veiculo, unicoOrdenado(dados.filter(d => d.uf === ids.uf.value && d.categoria === ids.categoria.value && d.marca === ids.marca.value).map(d => d.veiculo)));
+      }
+      preencherSelect(ids.periodo, unicoOrdenado(dados.map(d => d.periodo_meses)).sort((a, b) => Number(a) - Number(b)));
+      atualizarGraficos();
+    }
+
+    function atualizarGraficos() {
+      const dfVeic = filtrarBase();
+      const periodo = Number(ids.periodo.value);
+
+      plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE 0 km requerido ao mês", "% da FIPE 0 km / mês", true);
+      plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false);
+      plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER", false);
+
+      const existePeriodo = dfVeic.some(d =>
+        Number(d.periodo_meses) === periodo &&
+        (valorValido(d.perc_fipe_0km_requerido_mes) || valorValido(d.valor_mensal_total_esperado) || valorValido(d.eer_calculada))
+      );
+      const divsCat = ["grafico-fipe-categoria", "grafico-custo-categoria", "grafico-eer-categoria", "grafico-custo-estados"];
+
+      if (!existePeriodo) {
+        ids.aviso.style.display = "block";
+        ids.aviso.textContent = `Não há estimativa disponível para ${ids.veiculo.value} no período de ${periodo} meses. Por isso, os gráficos comparativos não são exibidos.`;
+        divsCat.forEach(id => Plotly.purge(id));
+        return;
+      }
+
+      ids.aviso.style.display = "none";
+      const dfCat = dados.filter(d => d.uf === ids.uf.value && d.categoria === ids.categoria.value && d.periodo_meses === periodo);
+
+      plotCategoria("grafico-fipe-categoria", dfCat, "perc_fipe_0km_requerido_mes", "% FIPE 0 km requerido ao mês", "% da FIPE 0 km / mês", true, false);
+      plotCategoria("grafico-custo-categoria", dfCat, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false, false);
+      plotCategoria("grafico-eer-categoria", dfCat, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER", false, true);
+
+      const dfEstados = dados.filter(d =>
+        d.categoria === ids.categoria.value &&
+        d.veiculo === ids.veiculo.value &&
+        d.periodo_meses === periodo
+      );
+
+      plotEstados(
+        "grafico-custo-estados",
+        dfEstados,
+        `Custo mensal estimado por UF - ${ids.veiculo.value} (${periodo} meses)`,
+        "R$ por mês"
+      );
+    }
+
+    ids.uf.addEventListener("change", () => atualizarFiltros(1));
+    ids.categoria.addEventListener("change", () => atualizarFiltros(2));
+    ids.marca.addEventListener("change", () => atualizarFiltros(3));
+    ids.veiculo.addEventListener("change", atualizarGraficos);
+    ids.periodo.addEventListener("change", atualizarGraficos);
+    window.addEventListener("resize", () => atualizarGraficos());
+
+    Papa.parse("data/veiculos_brasil_tidy.csv", {
+      download: true,
+      header: true,
+      dynamicTyping: true,
+      complete: function(results) {
+        dados = results.data
+          .filter(d => d.uf && d.categoria && d.veiculo)
+          .map(d => ({
+            ...d,
+            marca: String(d.veiculo).split(" ")[0],
+            periodo_meses: toNumeroOuNull(d.periodo_meses),
+            perc_fipe_0km_requerido_mes: toNumeroOuNull(d.perc_fipe_0km_requerido_mes),
+            valor_mensal_total_esperado: toNumeroOuNull(d.valor_mensal_total_esperado),
+            eer_calculada: toNumeroOuNull(d.eer_calculada)
+          }));
+
+        preencherSelect(ids.uf, unicoOrdenado(dados.map(d => d.uf)));
+        atualizarFiltros(1);
+      },
+      error: function(err) {
+        alert("Erro ao carregar o CSV. Confira se o arquivo está em data/veiculos_brasil_tidy.csv");
+        console.error(err);
+      }
+    });
+  </script>
 </body>
 </html>
 
