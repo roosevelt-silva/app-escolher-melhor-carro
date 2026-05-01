@@ -158,6 +158,18 @@
       <div id="grafico-eer-categoria" class="grafico"></div>
     </section>
 
+
+
+    <section>
+      <h2>3. Custo do veículo selecionado nos diferentes estados</h2>
+      <p style="color:#52606d; margin-top:-6px;">
+        Comparação do custo mensal estimado do mesmo veículo, no período selecionado, em todas as UFs disponíveis.
+        A UF selecionada nos filtros é destacada em vermelho.
+      </p>
+      <h3>Custo mensal estimado por UF</h3>
+      <div id="grafico-custo-estados" class="grafico"></div>
+    </section>
+
     <div class="rodape">
       Dados consolidados a partir das planilhas por UF. Valores percentuais são apresentados em %.
     </div>
@@ -268,6 +280,36 @@
       Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
     }
 
+
+
+    function plotEstados(divId, df, titulo, eixoX) {
+      const ordenado = [...df].sort((a, b) => a.valor_mensal_total_esperado - b.valor_mensal_total_esperado);
+      const x = ordenado.map(d => d.valor_mensal_total_esperado);
+      const y = ordenado.map(d => d.uf);
+      const cores = ordenado.map(d => d.uf === ids.uf.value ? "#d71920" : "lightgray");
+      const labels = x.map(numeroBR);
+
+      const trace = {
+        type: "bar",
+        orientation: "h",
+        x,
+        y,
+        text: labels,
+        textposition: "outside",
+        marker: { color: cores },
+        cliponaxis: false,
+        hovertemplate: "UF: %{y}<br>Custo mensal: R$ %{text}<extra></extra>"
+      };
+
+      const altura = Math.min(760, Math.max(520, 24 * ordenado.length));
+      const layout = layoutBase(titulo, eixoX, "UF", altura);
+      layout.margin.l = window.innerWidth < 800 ? 70 : 90;
+      layout.margin.r = 90;
+      layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 } };
+      layout.xaxis.range = [0, Math.max(...x, 0) * 1.22];
+      Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
+    }
+
     function atualizarFiltros(nivel) {
       if (nivel <= 1) {
         preencherSelect(ids.categoria, unicoOrdenado(dados.filter(d => d.uf === ids.uf.value).map(d => d.categoria)));
@@ -291,7 +333,7 @@
       plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER", false);
 
       const existePeriodo = dfVeic.some(d => d.periodo_meses === periodo);
-      const divsCat = ["grafico-fipe-categoria", "grafico-custo-categoria", "grafico-eer-categoria"];
+      const divsCat = ["grafico-fipe-categoria", "grafico-custo-categoria", "grafico-eer-categoria", "grafico-custo-estados"];
 
       if (!existePeriodo) {
         ids.aviso.style.display = "block";
@@ -306,6 +348,19 @@
       plotCategoria("grafico-fipe-categoria", dfCat, "perc_fipe_0km_requerido_mes", "% FIPE 0 km requerido ao mês", "% da FIPE 0 km / mês", true, false);
       plotCategoria("grafico-custo-categoria", dfCat, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false, false);
       plotCategoria("grafico-eer-categoria", dfCat, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER", false, true);
+
+      const dfEstados = dados.filter(d =>
+        d.categoria === ids.categoria.value &&
+        d.veiculo === ids.veiculo.value &&
+        d.periodo_meses === periodo
+      );
+
+      plotEstados(
+        "grafico-custo-estados",
+        dfEstados,
+        `Custo mensal estimado por UF - ${ids.veiculo.value} (${periodo} meses)`,
+        "R$ por mês"
+      );
     }
 
     ids.uf.addEventListener("change", () => atualizarFiltros(1));
@@ -342,3 +397,4 @@
   </script>
 </body>
 </html>
+
