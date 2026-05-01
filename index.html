@@ -732,6 +732,17 @@
           }));
 
         preencherSelect(ids.uf, unicoOrdenado(dados.map(d => d.uf)));
+        // Define UF padrão = SP
+        if ([...ids.uf.options].some(opt => opt.value === "SP")) {
+          ids.uf.value = "SP";
+        }
+        // Atualiza categorias com base em SP
+        atualizarFiltros(1);
+        // Define categoria padrão = SUV
+        if ([...ids.categoria.options].some(opt => opt.value === "SUV")) {
+          ids.categoria.value = "SUV";
+        }
+        // Atualiza marcas e veículos após escolher SUV
         atualizarFiltros(1);
       },
       error: function(err) {
