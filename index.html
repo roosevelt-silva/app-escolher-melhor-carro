@@ -117,6 +117,13 @@
     }
     .legenda-eer strong { margin-right: 4px; }
     .legenda-eer span { white-space: nowrap; }
+    .nota-periodos {
+      font-size: 0.78rem;
+      color: #7b8794;
+      margin: -12px 0 18px;
+      display: none;
+      line-height: 1.35;
+    }
 
     @media (max-width: 800px) {
       header h1 { font-size: 1.55rem; }
@@ -187,6 +194,9 @@
         <span style="color:#F28E2B;">■ Baixo</span>
         <span style="color:#D71920;">■ Muito baixo</span>
       </div>
+      <p id="nota-periodos-veiculo" class="nota-periodos">
+        * Períodos não exibidos indicam ausência de estimativas para o veículo selecionado.
+      </p>
 
     </section>
 
@@ -219,6 +229,9 @@
         <span style="color:#F28E2B;">■ Baixo</span>
         <span style="color:#D71920;">■ Muito baixo</span>
       </div>
+      <p id="nota-periodos-categoria" class="nota-periodos">
+        * Veículos sem estimativas para o período selecionado têm suas barras omitidas nos gráficos comparativos.
+      </p>
 
     </section>
 
@@ -252,7 +265,9 @@
       marca: document.getElementById("marca"),
       veiculo: document.getElementById("veiculo"),
       periodo: document.getElementById("periodo"),
-      aviso: document.getElementById("aviso")
+      aviso: document.getElementById("aviso"),
+      notaPeriodosVeiculo: document.getElementById("nota-periodos-veiculo"),
+      notaPeriodosCategoria: document.getElementById("nota-periodos-categoria")
     };
 
     const plotConfig = {
@@ -318,6 +333,29 @@
 
     function valorValido(v) {
       return v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v));
+    }
+
+    function temTodosPeriodos(df, periodosEsperados = [12, 24, 36, 48, 60]) {
+      const periodosDisponiveis = [...new Set(
+        df
+          .filter(d =>
+            valorValido(d.periodo_meses) &&
+            (valorValido(d.perc_fipe_0km_requerido_mes) ||
+             valorValido(d.valor_mensal_total_esperado) ||
+             valorValido(d.eer_calculada))
+          )
+          .map(d => Number(d.periodo_meses))
+      )];
+      return periodosEsperados.every(p => periodosDisponiveis.includes(p));
+    }
+
+    function atualizarNotasPeriodos(dfVeic, dfCatPeriodo) {
+      if (ids.notaPeriodosVeiculo) {
+        ids.notaPeriodosVeiculo.style.display = temTodosPeriodos(dfVeic) ? "none" : "block";
+      }
+      if (ids.notaPeriodosCategoria) {
+        ids.notaPeriodosCategoria.style.display = temTodosPeriodos(dfCatPeriodo) ? "none" : "block";
+      }
     }
 
     function corEER(valor) {
@@ -496,6 +534,13 @@
     function atualizarGraficos() {
       const dfVeic = filtrarBase();
       const periodo = Number(ids.periodo.value);
+      const dfCatPeriodo = dados.filter(d =>
+        d.uf === ids.uf.value &&
+        d.categoria === ids.categoria.value &&
+        d.periodo_meses === periodo
+      );
+
+      atualizarNotasPeriodos(dfVeic, dfCatPeriodo);
 
       plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE 0 km requerido ao mês", "% da FIPE 0 km / mês", true);
       plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false);
@@ -515,7 +560,7 @@
       }
 
       ids.aviso.style.display = "none";
-      const dfCat = dados.filter(d => d.uf === ids.uf.value && d.categoria === ids.categoria.value && d.periodo_meses === periodo);
+      const dfCat = dfCatPeriodo;
 
       plotCategoria("grafico-fipe-categoria", dfCat, "perc_fipe_0km_requerido_mes", "% FIPE 0 km requerido ao mês", "% da FIPE 0 km / mês", true, false);
       plotCategoria("grafico-custo-categoria", dfCat, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false, false);
