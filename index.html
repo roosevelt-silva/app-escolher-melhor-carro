@@ -140,9 +140,9 @@
 
     <section>
       <h2>1. Melhor período para o veículo selecionado</h2>
-      <p class="explica">Estes três gráficos mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A ideia central é identificar em qual prazo o custo mensal se dilui melhor e em qual período a EER se torna mais favorável. Em geral, períodos muito curtos concentram mais depreciação; ciclos intermediários tendem a mostrar melhor equilíbrio entre custo e reposição.</p>
+      <p class="explica">Os três gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A ideia central é identificar em qual prazo o custo mensal se dilui melhor e em qual período a EER se torna mais favorável. Em geral, períodos muito curtos concentram mais depreciação; ciclos intermediários tendem a mostrar melhor equilíbrio entre custo e reposição.</p>
       <h3>% FIPE 0 km requerido ao mês</h3>
-      <p class="explica">Indica qual fração do valor FIPE do veículo zero-quilômetro precisa ser provisionada por mês para viabilizar a troca ao final do período. Quanto menor esse percentual, maior tende a ser a eficiência econômica do veículo naquele ciclo.</p>
+      <p class="explica">Indica qual fração do valor FIPE do veículo zero-quilômetro precisa ser provisionada por mês para viabilizar a troca ao final do período. Quanto menor esse percentual, a eficiência econômica do veículo naquele ciclo tende a ser melhor.</p>
       <div id="grafico-fipe-periodos" class="grafico"></div>
 
       <h3>Custo mensal estimado</h3>
@@ -254,7 +254,14 @@
 
     function plotPeriodos(divId, df, coluna, titulo, eixoY, percentual = false) {
       const ordenado = [...df].sort((a, b) => a.periodo_meses - b.periodo_meses);
-      const y = ordenado.map(d => percentual ? d[coluna] * 100 : d[coluna]);
+      const y = periodos.map(p => {
+        const row = dadosVeiculo.find(d => Number(d.periodo_meses) === p);
+        if (!row || row[coluna] === "" || row[coluna] === null) {
+          return null; // 🔥 ESSENCIAL
+        }
+        return Number(row[coluna]);
+      });
+      //const y = ordenado.map(d => percentual ? d[coluna] * 100 : d[coluna]);
       const labels = y.map(numeroBR);
       const trace = {
         type: "bar",
