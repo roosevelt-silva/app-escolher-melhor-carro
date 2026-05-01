@@ -254,14 +254,7 @@
 
     function plotPeriodos(divId, df, coluna, titulo, eixoY, percentual = false) {
       const ordenado = [...df].sort((a, b) => a.periodo_meses - b.periodo_meses);
-      const y = periodos.map(p => {
-        const row = dadosVeiculo.find(d => Number(d.periodo_meses) === p);
-        if (!row || row[coluna] === "" || row[coluna] === null) {
-          return null; // 🔥 ESSENCIAL
-        }
-        return Number(row[coluna]);
-      });
-      //const y = ordenado.map(d => percentual ? d[coluna] * 100 : d[coluna]);
+      const y = ordenado.map(d => percentual ? d[coluna] * 100 : d[coluna]);
       const labels = y.map(numeroBR);
       const trace = {
         type: "bar",
