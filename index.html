@@ -98,6 +98,22 @@
       color: #52606d;
       text-align: center;
     }
+    .legenda-eer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      align-items: center;
+      margin: -10px 0 24px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border: 1px solid #d9e2ec;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #334e68;
+    }
+    .legenda-eer strong { margin-right: 4px; }
+    .legenda-eer span { white-space: nowrap; }
+
     @media (max-width: 800px) {
       header h1 { font-size: 1.55rem; }
       .filtros { grid-template-columns: 1fr; }
@@ -152,6 +168,16 @@
       <h3>Eficiência Econômica de Reposição - EER</h3>
       <p class="explica">A EER sintetiza o equilíbrio entre custo mensal e valor de reposição. Valores maiores indicam melhor desempenho econômico relativo dentro do critério adotado, favorecendo veículos que combinam menor custo proporcional e menor custo absoluto.</p>
       <div id="grafico-eer-periodos" class="grafico"></div>
+      <div class="legenda-eer" aria-label="Legenda da classificação da EER">
+        <strong>Classificação da EER:</strong>
+        <span style="color:#4B0082;">■ Excelente</span>
+        <span style="color:#08519C;">■ Muito bom</span>
+        <span style="color:#3182BD;">■ Bom</span>
+        <span style="color:#FDD049;">■ Regular</span>
+        <span style="color:#F28E2B;">■ Baixo</span>
+        <span style="color:#D71920;">■ Muito baixo</span>
+      </div>
+
     </section>
 
     <section>
@@ -174,6 +200,16 @@
       <h3>Eficiência Econômica de Reposição - EER</h3>
       <p class="explica">Mostra o posicionamento final do veículo frente aos concorrentes da categoria. Quanto maior a EER, melhor o equilíbrio econômico entre custo mensal, valor de reposição e desempenho relativo.</p>
       <div id="grafico-eer-categoria" class="grafico"></div>
+      <div class="legenda-eer" aria-label="Legenda da classificação da EER">
+        <strong>Classificação da EER:</strong>
+        <span style="color:#4B0082;">■ Excelente</span>
+        <span style="color:#08519C;">■ Muito bom</span>
+        <span style="color:#3182BD;">■ Bom</span>
+        <span style="color:#FDD049;">■ Regular</span>
+        <span style="color:#F28E2B;">■ Baixo</span>
+        <span style="color:#D71920;">■ Muito baixo</span>
+      </div>
+
     </section>
 
 
@@ -256,8 +292,26 @@
       return v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v));
     }
 
-    function toNumeroOuNull(v) {
-      return valorValido(v) ? Number(v) : null;
+    function corEER(valor) {
+      const v = Number(valor);
+      if (!Number.isFinite(v)) return "lightgray";
+      if (v >= 90) return "#4B0082";   // Excelente - roxo/anil
+      if (v >= 80) return "#08519C";   // Muito bom - azul escuro
+      if (v >= 70) return "#3182BD";   // Bom - azul
+      if (v >= 60) return "#FDD049";   // Regular - amarelo
+      if (v >= 50) return "#F28E2B";   // Baixo - laranja
+      return "#D71920";                // Muito baixo - vermelho
+    }
+
+    function classeEER(valor) {
+      const v = Number(valor);
+      if (!Number.isFinite(v)) return "Sem dados";
+      if (v >= 90) return "Excelente";
+      if (v >= 80) return "Muito bom";
+      if (v >= 70) return "Bom";
+      if (v >= 60) return "Regular";
+      if (v >= 50) return "Baixo";
+      return "Muito baixo";
     }
 
     function plotPeriodos(divId, df, coluna, titulo, eixoY, percentual = false) {
@@ -274,7 +328,13 @@
       const x = ordenado.map(d => Number(d.periodo_meses));
       const y = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
       const labels = y.map(numeroBR);
-      const maxY = Math.max(...y.filter(valorValido));
+      const maxY = Math.max(...y);
+
+      const cores = coluna === "eer_calculada"
+        ? ordenado.map(d => corEER(Number(d[coluna])))
+        : "#1f77b4";
+
+      const classes = ordenado.map(d => coluna === "eer_calculada" ? classeEER(Number(d[coluna])) : "");
 
       const trace = {
         type: "bar",
@@ -282,8 +342,12 @@
         y,
         text: labels,
         textposition: "outside",
-        marker: { color: "#1f77b4" },
-        cliponaxis: false
+        marker: { color: cores },
+        cliponaxis: false,
+        customdata: classes,
+        hovertemplate: coluna === "eer_calculada"
+          ? "Período: %{x} meses<br>EER: %{text}<br>Classe: %{customdata}<extra></extra>"
+          : "Período: %{x} meses<br>Valor: %{text}<extra></extra>"
       };
       const layout = layoutBase(titulo, "Período de troca (meses)", eixoY, 420);
       layout.xaxis.tickmode = "array";
@@ -305,8 +369,12 @@
 
       const x = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
       const y = ordenado.map(d => d.veiculo);
-      const cores = ordenado.map(d => d.veiculo === ids.veiculo.value ? "#d71920" : "lightgray");
+      const cores = ordenado.map(d => {
+        if (d.veiculo !== ids.veiculo.value) return "lightgray";
+        return coluna === "eer_calculada" ? corEER(Number(d[coluna])) : "#d71920";
+      });
       const labels = x.map(numeroBR);
+      const classes = ordenado.map(d => coluna === "eer_calculada" ? classeEER(Number(d[coluna])) : "");
 
       const trace = {
         type: "bar",
@@ -317,7 +385,10 @@
         textposition: "outside",
         marker: { color: cores },
         cliponaxis: false,
-        hovertemplate: "%{y}<br>Valor: %{text}<extra></extra>"
+        customdata: classes,
+        hovertemplate: coluna === "eer_calculada"
+          ? "%{y}<br>EER: %{text}<br>Classe: %{customdata}<extra></extra>"
+          : "%{y}<br>Valor: %{text}<extra></extra>"
       };
 
       const altura = Math.min(680, Math.max(420, 27 * ordenado.length));
@@ -325,7 +396,7 @@
       layout.margin.l = window.innerWidth < 800 ? 120 : 230;
       layout.margin.r = 70;
       layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 } };
-      layout.xaxis.range = [0, Math.max(...x, 0) * 1.22];
+      layout.xaxis.range = [0, Math.max(...x) * 1.22];
       Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
     }
 
@@ -364,7 +435,7 @@
       layout.margin.l = window.innerWidth < 800 ? 70 : 90;
       layout.margin.r = 90;
       layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 } };
-      layout.xaxis.range = [0, Math.max(...x, 0) * 1.22];
+      layout.xaxis.range = [0, Math.max(...x) * 1.22];
       Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
     }
 
@@ -441,10 +512,10 @@
           .map(d => ({
             ...d,
             marca: String(d.veiculo).split(" ")[0],
-            periodo_meses: toNumeroOuNull(d.periodo_meses),
-            perc_fipe_0km_requerido_mes: toNumeroOuNull(d.perc_fipe_0km_requerido_mes),
-            valor_mensal_total_esperado: toNumeroOuNull(d.valor_mensal_total_esperado),
-            eer_calculada: toNumeroOuNull(d.eer_calculada)
+            periodo_meses: Number(d.periodo_meses),
+            perc_fipe_0km_requerido_mes: (d.perc_fipe_0km_requerido_mes === null || d.perc_fipe_0km_requerido_mes === undefined || d.perc_fipe_0km_requerido_mes === "") ? null : Number(d.perc_fipe_0km_requerido_mes),
+            valor_mensal_total_esperado: (d.valor_mensal_total_esperado === null || d.valor_mensal_total_esperado === undefined || d.valor_mensal_total_esperado === "") ? null : Number(d.valor_mensal_total_esperado),
+            eer_calculada: (d.eer_calculada === null || d.eer_calculada === undefined || d.eer_calculada === "") ? null : Number(d.eer_calculada)
           }));
 
         preencherSelect(ids.uf, unicoOrdenado(dados.map(d => d.uf)));
