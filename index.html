@@ -276,7 +276,7 @@
       </section>
       <div id="aviso" class="aviso"></div>
 
-      <h3>% FIPE 0 km requerido ao mês</h3>
+      <h3>% FIPE zero-km requerido ao mês</h3>
       <p class="explica">Compara o custo proporcional dos veículos da categoria. É útil para avaliar eficiência independentemente do preço absoluto do carro.</p>
       <div id="grafico-fipe-categoria" class="grafico"></div>
 
@@ -522,7 +522,7 @@
 
     function tituloCategoria(base, periodo, tipo) {
       if (!isMobile()) return `${base} (${periodo} meses)`;
-      if (tipo === "fipe") return `% FIPE 0 km<br>(${periodo} meses)`;
+      if (tipo === "fipe") return `% FIPE zero-km<br>(${periodo} meses)`;
       if (tipo === "custo") return `Custo mensal<br>(${periodo} meses)`;
       if (tipo === "eer") return `EER<br>(${periodo} meses)`;
       return `${base}<br>(${periodo} meses)`;
@@ -688,7 +688,7 @@
 
       atualizarNotasPeriodos(dfVeic, dfCatPeriodo);
 
-      plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE 0 km requerido ao mês", "% da FIPE 0 km / mês", true);
+      plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE zero-km requerido ao mês", "% da FIPE zero-km / mês", true);
       plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false);
       plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER (%)", false);
 
@@ -704,7 +704,7 @@
         divsCat.forEach(id => Plotly.purge(id));
       } else {
         ids.aviso.style.display = "none";
-        plotCategoria("grafico-fipe-categoria", dfCatPeriodo, "perc_fipe_0km_requerido_mes", tituloCategoria("% FIPE 0 km requerido ao mês", periodo, "fipe"), "% da FIPE 0 km / mês", true, false);
+        plotCategoria("grafico-fipe-categoria", dfCatPeriodo, "perc_fipe_0km_requerido_mes", tituloCategoria("% FIPE zero-km requerido ao mês", periodo, "fipe"), "% da FIPE zero-km / mês", true, false);
         plotCategoria("grafico-custo-categoria", dfCatPeriodo, "valor_mensal_total_esperado", tituloCategoria("Custo mensal estimado", periodo, "custo"), "R$ por mês", false, false);
         plotCategoria("grafico-eer-categoria", dfCatPeriodo, "eer_calculada", tituloCategoria("Eficiência Econômica de Reposição - EER", periodo, "eer"), "EER (%)", false, true);
       }
