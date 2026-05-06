@@ -313,6 +313,32 @@
       <div id="grafico-custo-estados" class="grafico"></div>
     </section>
 
+    <section>
+      <h2>4. Comparação geral de eficiência com todos os veículos</h2>
+      <p class="explica">Esta seção compara o veículo selecionado com todos os modelos disponíveis na base, considerando todas as categorias no mesmo estado (UF). A comparação usa somente a <strong>Eficiência Econômica de Reposição (EER)</strong>, permitindo verificar a posição geral do veículo no mercado para o período escolhido. O veículo selecionado aparece destacado em vermelho, enquanto os demais aparecem em cinza.</p>
+      <section class="painel">
+        <label for="periodo-geral">Selecione o período para comparação geral</label>
+        <select id="periodo-geral"></select>
+      </section>
+      <div id="aviso-geral" class="aviso"></div>
+
+      <h3>Eficiência Econômica de Reposição - EER: ranking geral</h3>
+      <p class="explica">Quanto maior a EER, melhor o equilíbrio econômico relativo entre custo mensal, valor de reposição e desempenho proporcional. Este gráfico amplia a comparação para além da categoria do veículo escolhido.</p>
+      <div id="grafico-eer-geral" class="grafico"></div>
+      <div class="legenda-eer" aria-label="Legenda da classificação da EER">
+        <strong>Classificação da EER:</strong>
+        <span style="color:#4B0082;">■ Excelente</span>
+        <span style="color:#08519C;">■ Muito bom</span>
+        <span style="color:#3182BD;">■ Bom</span>
+        <span style="color:#FDD049;">■ Regular</span>
+        <span style="color:#F28E2B;">■ Baixo</span>
+        <span style="color:#D71920;">■ Muito baixo</span>
+      </div>
+      <p id="nota-periodos-geral" class="nota-periodos">
+        * Veículos sem estimativas de EER para o período selecionado são omitidos no ranking geral.
+      </p>
+    </section>
+
     <h3 style="margin-top:24px;">RESUMO METODOLÓGICO</h3>
     <p style="font-size:0.9rem; color:#52606d; margin-top:6px;">
       Parâmetros principais utilizados nas estimativas do modelo:
@@ -400,9 +426,12 @@
       veiculo: document.getElementById("veiculo"),
       periodo: document.getElementById("periodo"),
       periodoEstados: document.getElementById("periodo-estados"),
+      periodoGeral: document.getElementById("periodo-geral"),
       aviso: document.getElementById("aviso"),
+      avisoGeral: document.getElementById("aviso-geral"),
       notaPeriodosVeiculo: document.getElementById("nota-periodos-veiculo"),
-      notaPeriodosCategoria: document.getElementById("nota-periodos-categoria")
+      notaPeriodosCategoria: document.getElementById("nota-periodos-categoria"),
+      notaPeriodosGeral: document.getElementById("nota-periodos-geral")
     };
 
     const plotConfig = {
@@ -529,6 +558,12 @@
       return `${base}<br>(${periodo} meses)`;
     }
 
+    function tituloGeral(periodo) {
+      return isMobile()
+        ? `EER - ranking geral<br>(${periodo} meses)`
+        : `Eficiência Econômica de Reposição - ranking geral (${periodo} meses)`;
+    }
+
     function tituloEstados(veiculo, periodo) {
       return isMobile()
         ? `Custo mensal por UF<br>(${periodo} meses)`
@@ -619,6 +654,48 @@
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
+    function plotGeralEER(divId, df, titulo) {
+      let ordenado = [...df].filter(d => valorValido(d.eer_calculada));
+      ordenado = ordenado.sort((a, b) => Number(b.eer_calculada) - Number(a.eer_calculada));
+
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis de EER para este período.</div>';
+        return;
+      }
+
+      const x = ordenado.map(d => Number(d.eer_calculada));
+      const y = ordenado.map(d => `${d.veiculo} (${d.categoria})`);
+      const cores = ordenado.map(d => {
+        if (d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value) return "#d71920";
+        return "lightgray";
+      });
+      const labels = x.map(v => numeroBR(v, "percentual"));
+      const classes = ordenado.map(d => classeEER(Number(d.eer_calculada)));
+      const custom = ordenado.map(d => [d.categoria, d.marca, classeEER(Number(d.eer_calculada))]);
+
+      const trace = {
+        type: "bar",
+        orientation: "h",
+        x,
+        y,
+        text: labels,
+        textposition: "outside",
+        marker: { color: cores },
+        cliponaxis: false,
+        customdata: custom,
+        hovertemplate: "%{y}<br>Categoria: %{customdata[0]}<br>EER: %{text}<br>Classe: %{customdata[2]}<extra></extra>"
+      };
+
+      const altura = Math.min(980, Math.max(520, 23 * ordenado.length));
+      const layout = layoutBase(titulo, "EER (%)", "", altura);
+      layout.margin.l = window.innerWidth < 800 ? 150 : 280;
+      layout.margin.r = isMobile() ? 35 : 80;
+      layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 8 : 10 }, fixedrange: true };
+      layout.xaxis.range = [0, Math.max(...x) * 1.18];
+      Plotly.newPlot(divId, [trace], layout, plotConfig);
+    }
+
     function plotEstados(divId, df, titulo, eixoX) {
       const ordenado = [...df]
         .filter(d => valorValido(d.valor_mensal_total_esperado))
@@ -660,8 +737,10 @@
       const periodos = unicoOrdenado(dados.map(d => d.periodo_meses)).sort((a, b) => Number(a) - Number(b));
       preencherSelect(ids.periodo, periodos);
       preencherSelect(ids.periodoEstados, periodos);
+      preencherSelect(ids.periodoGeral, periodos);
       definirSelectSeExiste(ids.periodo, "24");
       definirSelectSeExiste(ids.periodoEstados, "24");
+      definirSelectSeExiste(ids.periodoGeral, "24");
     }
 
     function atualizarFiltros(nivel) {
@@ -681,6 +760,7 @@
       const dfVeic = filtrarBase();
       const periodo = Number(ids.periodo.value);
       const periodoEstados = Number(ids.periodoEstados.value);
+      const periodoGeral = Number(ids.periodoGeral.value);
       const dfCatPeriodo = dados.filter(d =>
         d.uf === ids.uf.value &&
         d.categoria === ids.categoria.value &&
@@ -722,6 +802,31 @@
         tituloEstados(ids.veiculo.value, periodoEstados),
         "R$ por mês"
       );
+
+      const dfGeralPeriodo = dados.filter(d =>
+        d.uf === ids.uf.value &&
+        Number(d.periodo_meses) === periodoGeral
+      );
+      const existePeriodoGeral = dfGeralPeriodo.some(d =>
+        d.categoria === ids.categoria.value &&
+        d.veiculo === ids.veiculo.value &&
+        valorValido(d.eer_calculada)
+      );
+
+      if (ids.notaPeriodosGeral) ids.notaPeriodosGeral.style.display = "block";
+
+      if (!existePeriodoGeral) {
+        ids.avisoGeral.style.display = "block";
+        ids.avisoGeral.textContent = `Não há estimativa de EER disponível para ${ids.veiculo.value} no período de ${periodoGeral} meses. O ranking geral é exibido sem destaque do veículo selecionado.`;
+      } else {
+        ids.avisoGeral.style.display = "none";
+      }
+
+      plotGeralEER(
+        "grafico-eer-geral",
+        dfGeralPeriodo,
+        tituloGeral(periodoGeral)
+      );
     }
 
     ids.uf.addEventListener("change", () => atualizarFiltros(1));
@@ -730,6 +835,7 @@
     ids.veiculo.addEventListener("change", atualizarGraficos);
     ids.periodo.addEventListener("change", atualizarGraficos);
     ids.periodoEstados.addEventListener("change", atualizarGraficos);
+    ids.periodoGeral.addEventListener("change", atualizarGraficos);
     window.addEventListener("resize", () => atualizarGraficos());
 
     Papa.parse("data/veiculos_brasil_tidy.csv", {
@@ -766,3 +872,4 @@
   </script>
 </body>
 </html>
+
