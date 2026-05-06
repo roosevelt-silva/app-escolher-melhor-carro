@@ -315,7 +315,7 @@
 
     <section>
       <h2>4. Comparação geral de eficiência com todos os veículos</h2>
-      <p class="explica">Esta seção compara a <strong>Eficiência Econômica de Reposição (EER)</strong> do veículo selecionado com todos os modelos disponíveis na base, considerando todas as categorias no mesmo estado (UF). As barras mantêm a cor da classificação da EER, e o veículo selecionado recebe um contorno de destaque para facilitar sua identificação no ranking.</p>
+      <p class="explica">Esta seção compara o veículo selecionado com todos os modelos disponíveis na base, considerando todas as categorias no mesmo estado (UF). A comparação usa somente a <strong>Eficiência Econômica de Reposição (EER)</strong>, permitindo verificar a posição geral do veículo no mercado para o período escolhido. As barras mantêm a cor da classificação da EER, e o veículo selecionado recebe um contorno de destaque para facilitar sua identificação no ranking.</p>
       <section class="painel">
         <label for="periodo-geral">Selecione o período para comparação geral</label>
         <select id="periodo-geral"></select>
@@ -323,7 +323,7 @@
       <div id="aviso-geral" class="aviso"></div>
 
       <h3>Eficiência Econômica de Reposição - EER: ranking geral</h3>
-      <p class="explica">Quanto maior a EER (base do gráfico) dos veículos, melhor o equilíbrio econômico relativo entre custo mensal, valor de reposição e desempenho proporcional.</p>
+      <p class="explica">Quanto maior a EER, melhor o equilíbrio econômico relativo entre custo mensal, valor de reposição e desempenho proporcional. Este gráfico amplia a comparação para além da categoria do veículo escolhido.</p>
       <div id="grafico-eer-geral" class="grafico"></div>
       <div class="legenda-eer" aria-label="Legenda da classificação da EER">
         <strong>Classificação da EER:</strong>
@@ -667,7 +667,13 @@
       const x = ordenado.map(d => Number(d.eer_calculada));
       const selecionado = ordenado.map(d => d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value);
       const y = ordenado.map((d, i) => `linha_${i}`);
-      const rotulosY = ordenado.map(d => `${d.veiculo} (${d.categoria})`);
+      const rotulosY = ordenado.map(d => {
+        const nome = `${d.veiculo} (${d.categoria})`;
+        if (d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value) {
+          return `<span style="color:#00C853; font-weight:700;">${nome}</span>`;
+        }
+        return nome;
+      });
       const cores = ordenado.map(d => corEER(Number(d.eer_calculada)));
       const labels = ordenado.map(d => numeroBR(Number(d.eer_calculada), "percentual"));
       const classes = ordenado.map(d => classeEER(Number(d.eer_calculada)));
@@ -683,8 +689,8 @@
         marker: {
           color: cores,
           line: {
-            width: selecionado.map(v => v ? 3 : 0),
-            color: selecionado.map(v => v ? "#00E5FF" : "rgba(0,0,0,0)")
+            width: selecionado.map(v => v ? 4 : 0),
+            color: selecionado.map(v => v ? "#00C853" : "rgba(0,0,0,0)")
           }
         },
         cliponaxis: false,
