@@ -315,7 +315,7 @@
 
     <section>
       <h2>4. Comparação geral de eficiência com todos os veículos</h2>
-      <p class="explica">Esta seção compara o veículo selecionado com todos os modelos disponíveis na base, considerando todas as categorias no mesmo estado (UF). A comparação usa somente a <strong>Eficiência Econômica de Reposição (EER)</strong>, permitindo verificar a posição geral do veículo no mercado para o período escolhido. O veículo selecionado aparece destacado em vermelho, enquanto os demais aparecem em cinza.</p>
+      <p class="explica">Esta seção compara o veículo selecionado com todos os modelos disponíveis na base, considerando todas as categorias no mesmo estado (UF). A comparação usa somente a <strong>Eficiência Econômica de Reposição (EER)</strong>, permitindo verificar a posição geral do veículo no mercado para o período escolhido. As barras mantêm a cor da classificação da EER, e o veículo selecionado aparece identificado diretamente no rótulo da barra.</p>
       <section class="painel">
         <label for="periodo-geral">Selecione o período para comparação geral</label>
         <select id="periodo-geral"></select>
@@ -665,14 +665,18 @@
       }
 
       const x = ordenado.map(d => Number(d.eer_calculada));
-      const y = ordenado.map(d => `${d.veiculo} (${d.categoria})`);
-      const cores = ordenado.map(d => {
-        if (d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value) return "#d71920";
-        return "lightgray";
+      const y = ordenado.map(d => {
+        const selecionado = d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value;
+        return selecionado ? `► ${d.veiculo} (${d.categoria})` : `${d.veiculo} (${d.categoria})`;
       });
-      const labels = x.map(v => numeroBR(v, "percentual"));
+      const cores = ordenado.map(d => corEER(Number(d.eer_calculada)));
+      const labels = ordenado.map(d => {
+        const eer = numeroBR(Number(d.eer_calculada), "percentual");
+        const selecionado = d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value;
+        return selecionado ? `Seu veículo: ${d.veiculo}<br>${eer}` : eer;
+      });
       const classes = ordenado.map(d => classeEER(Number(d.eer_calculada)));
-      const custom = ordenado.map(d => [d.categoria, d.marca, classeEER(Number(d.eer_calculada))]);
+      const custom = ordenado.map(d => [d.categoria, d.marca, classeEER(Number(d.eer_calculada)), d.veiculo]);
 
       const trace = {
         type: "bar",
@@ -684,13 +688,13 @@
         marker: { color: cores },
         cliponaxis: false,
         customdata: custom,
-        hovertemplate: "%{y}<br>Categoria: %{customdata[0]}<br>EER: %{text}<br>Classe: %{customdata[2]}<extra></extra>"
+        hovertemplate: "Veículo: %{customdata[3]}<br>Categoria: %{customdata[0]}<br>EER: %{x:.2f}%<br>Classe: %{customdata[2]}<extra></extra>"
       };
 
       const altura = Math.min(980, Math.max(520, 23 * ordenado.length));
       const layout = layoutBase(titulo, "EER (%)", "", altura);
       layout.margin.l = window.innerWidth < 800 ? 150 : 280;
-      layout.margin.r = isMobile() ? 35 : 80;
+      layout.margin.r = isMobile() ? 70 : 130;
       layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 8 : 10 }, fixedrange: true };
       layout.xaxis.range = [0, Math.max(...x) * 1.18];
       Plotly.newPlot(divId, [trace], layout, plotConfig);
