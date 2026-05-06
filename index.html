@@ -5,7 +5,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-4TK4GFZF3N"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){dataLayer.push;}
   gtag('js', new Date());
 
   gtag('config', 'G-4TK4GFZF3N');
@@ -212,7 +212,7 @@
 
   <main>
     <section class="intro">
-      <strong>Sobre esta ferramenta.</strong> O objetivo é apoiar o usuário na resposta a duas perguntas centrais: <strong>qual veículo apresenta melhor desempenho econômico</strong> e <strong>qual é o período mais vantajoso para a troca</strong>. A plataforma permite comparar, de forma simples e objetiva, o custo mensal estimado para substituir um veículo seminovo — com 12, 24, 36, 48 ou 60 meses de uso — por um modelo zero-quilômetro equivalente. Além do valor absoluto, é apresentado o custo relativo, expresso como percentual da Tabela FIPE do veículo zero km, indicando quanto desse valor precisa ser provisionado mensalmente para viabilizar a reposição. Complementarmente, é introduzido o indicador de <strong>Eficiência Econômica de Reposição (EER)</strong>, que sintetiza o equilíbrio entre custo absoluto e custo relativo, permitindo qualificar a decisão de forma comparativa. Os cálculos incorporam custos com seguro, IPVA, revisões e manutenção, pneus e combustível, além do montante necessário — distribuído ao longo do tempo — para viabilizar a troca ao final de cada período analisado..
+      <strong>Sobre esta ferramenta.</strong> O objetivo é apoiar o usuário na resposta a duas perguntas centrais: <strong>qual veículo apresenta melhor desempenho econômico</strong> e <strong>qual é o período mais vantajoso para a troca</strong>. A plataforma permite comparar, de forma simples e objetiva, o custo mensal estimado para substituir um veículo seminovo — com 12, 24, 36, 48 ou 60 meses de uso — por um modelo zero-quilômetro equivalente. Além do valor absoluto, é apresentado o custo relativo, expresso como percentual da Tabela FIPE do veículo zero km, indicando quanto desse valor precisa ser provisionado mensalmente para viabilizar a reposição. Complementarmente, é introduzido o indicador de <strong>Eficiência Econômica de Reposição</strong>, que sintetiza o equilíbrio entre custo absoluto e custo relativo, permitindo qualificar a decisão de forma comparativa. Os cálculos incorporam custos com seguro, IPVA, revisões e manutenção, pneus e combustível, além do montante necessário — distribuído ao longo do tempo — para viabilizar a troca ao final de cada período analisado..
     </section>
     <p style="margin-top:6px; font-size:0.85rem; color:#52606d;">
       São considerados apenas veículos disponíveis para venda na condição zero quilômetro e com histórico mínimo de 24 meses no mercado de seminovos. Para padronizar as comparações, foi considerada a versão topo de linha de cada modelo.
@@ -241,7 +241,7 @@
 
     <section>
       <h2>1. Melhor período para o veículo selecionado</h2>
-      <p class="explica">Os três gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A ideia central é identificar em qual prazo o custo mensal se dilui melhor e em qual período a Eficiência Econômica de Reposição (EER) se torna mais favorável.</p>
+      <p class="explica">Os três gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A ideia central é identificar em qual prazo o custo mensal se dilui melhor e em qual período a Eficiência Econômica de Reposição se torna mais favorável.</p>
 
       <h3>Custo mensal estimado</h3>
       <p class="explica">Mostra o valor mensal em reais associado às despesas em geral diluídas no período selecionado, incluindo o valor necessário para efetuar a troca do veículo seminovo por um zero-quilômetro em diferentes ciclos de troca. Esse indicador traduz o impacto direto no orçamento, incorporando depreciação e custos operacionais considerados no modelo.</p>
@@ -270,7 +270,7 @@
 
     <section>
       <h2>2. Comparação com os demais veículos da categoria</h2>
-      <p class="explica">Nesta seção, o veículo selecionado é comparado com todos os demais modelos da mesma categoria e no mesmo estado (UF). O veículo escolhido aparece destacado em vermelho. Essa comparação ajuda a entender se o modelo está entre os mais eficientes, intermediários ou menos vantajosos no período escolhido.</p>
+      <p class="explica">Nesta seção, o veículo selecionado é comparado com todos os demais modelos da mesma categoria e no mesmo estado. O veículo escolhido aparece destacado em vermelho. Essa comparação ajuda a entender se o modelo está entre os mais eficientes, intermediários ou menos vantajosos no período escolhido.</p>
       <section class="painel">
         <label for="periodo">Selecione o período de troca para comparação</label>
         <select id="periodo"></select>
@@ -315,7 +315,7 @@
 
     <section>
       <h2>4. Comparação geral de eficiência com todos os veículos</h2>
-      <p class="explica">Esta seção compara a <strong>Eficiência Econômica de Reposição (EER)</strong> do veículo selecionado com todos os modelos disponíveis na base, considerando todas as categorias no mesmo estado (UF). As barras mantêm a cor da classificação da EER, e o veículo selecionado recebe um contorno de destaque para facilitar sua identificação no ranking.</p>
+      <p class="explica">Esta seção compara o veículo selecionado com todos os modelos disponíveis na base, considerando todas as categorias no mesmo estado. A comparação usa somente a <strong>Eficiência Econômica de Reposição</strong>, permitindo verificar a posição geral do veículo no mercado para o período escolhido. As barras mantêm a cor da classificação da EER, e o veículo selecionado recebe um contorno de destaque para facilitar sua identificação no ranking.</p>
       <section class="painel">
         <label for="periodo-geral">Selecione o período para comparação geral</label>
         <select id="periodo-geral"></select>
@@ -323,7 +323,7 @@
       <div id="aviso-geral" class="aviso"></div>
 
       <h3>Eficiência Econômica de Reposição - EER: ranking geral</h3>
-      <p class="explica">Quanto maior a EER, melhor o equilíbrio econômico relativo entre custo mensal, valor de reposição e desempenho proporcional.</p>
+      <p class="explica">Quanto maior a EER, melhor o equilíbrio econômico relativo entre custo mensal, valor de reposição e desempenho proporcional. Este gráfico amplia a comparação para além da categoria do veículo escolhido.</p>
       <div id="grafico-eer-geral" class="grafico"></div>
       <div class="legenda-eer" aria-label="Legenda da classificação da EER">
         <strong>Classificação da EER:</strong>
@@ -363,7 +363,7 @@
         <div class="metodologia-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-5"/></svg>
         </div>
-        <div><strong>Seguro</strong><p>Aproximadamente 1,5% ao ano do valor do veículo (parâmetro conservador)</p></div>
+        <div><strong>Seguro</strong><p>Aproximadamente 1,5% ao ano do valor do veículo</p></div>
       </div>
 
       <div class="metodologia-card roxo">
@@ -377,7 +377,7 @@
         <div class="metodologia-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5 5L4 17v3h3l5.7-5.7a4 4 0 0 0 5-5l-3 3-2-2 3-3z"/></svg>
         </div>
-        <div><strong>Custos operacionais</strong><p>IPVA (por estado), manutenção, revisões, pneus e combustível</p></div>
+        <div><strong>Custos operacionais</strong><p>IPVA, manutenção, revisões, pneus e combustível</p></div>
       </div>
 
       <div class="metodologia-card">
@@ -402,7 +402,7 @@
       </div>
     </div>
     <p style="margin-top:10px; font-size:0.85rem; color:#52606d;">
-      Este estudo foi desenvolvido na <strong>Universidade Federal de Jataí (UFJ)</strong>, no Instituto de Ciências Exatas e Tecnológicas (ICET), sob coordenação do Prof. Dr. Roosevelt Alves da Silva.
+      Este estudo foi desenvolvido na <strong>Universidade Federal de Jataí</strong>, no Instituto de Ciências Exatas e Tecnológicas, sob coordenação do Prof. Dr. Roosevelt Alves da Silva.
     </p>
     <section class="artigo-link">
       <strong>Quer ver a metodologia e a discussão completa?</strong><br>
@@ -448,15 +448,15 @@
     }
 
     function numeroBR(valor, tipo = "normal") {
-      if (valor === null || valor === undefined || Number.isNaN(valor)) return "";
-      const v = Number(valor).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (valor === null || valor === undefined || Number.isNaN) return "";
+      const v = Number.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       if (tipo === "percentual") return v + "%";
       if (tipo === "moeda") return "R$ " + v;
       return v;
     }
 
-    function unicoOrdenado(arr) {
-      return [...new Set(arr.filter(v => v !== null && v !== undefined && v !== ""))].sort((a, b) => String(a).localeCompare(String(b), "pt-BR"));
+    function unicoOrdenado {
+      return [...new Set(arr.filter(v => v !== null && v !== undefined && v !== ""))].sort((a, b) => String.localeCompare(String, "pt-BR"));
     }
 
     function preencherSelect(select, valores) {
@@ -466,14 +466,14 @@
         const opt = document.createElement("option");
         opt.value = v;
         opt.textContent = v;
-        select.appendChild(opt);
+        select.appendChild;
       });
-      if (valores.map(String).includes(String(valorAnterior))) select.value = valorAnterior;
+      if (valores.map.includes(String)) select.value = valorAnterior;
     }
 
     function definirSelectSeExiste(select, valor) {
-      if ([...select.options].some(opt => String(opt.value) === String(valor))) {
-        select.value = String(valor);
+      if ([...select.options].some(opt => String(opt.value) === String)) {
+        select.value = String;
       }
     }
 
@@ -510,8 +510,8 @@
       };
     }
 
-    function valorValido(v) {
-      return v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v));
+    function valorValido {
+      return v !== null && v !== undefined && v !== "" && Number.isFinite(Number);
     }
 
     function temTodosPeriodos(df, periodosEsperados = [12, 24, 36, 48, 60]) {
@@ -520,17 +520,17 @@
           .filter(d => valorValido(d.periodo_meses) && (valorValido(d.perc_fipe_0km_requerido_mes) || valorValido(d.valor_mensal_total_esperado) || valorValido(d.eer_calculada)))
           .map(d => Number(d.periodo_meses))
       )];
-      return periodosEsperados.every(p => periodosDisponiveis.includes(p));
+      return periodosEsperados.every(p => periodosDisponiveis.includes);
     }
 
     function atualizarNotasPeriodos(dfVeic, dfCatPeriodo) {
-      if (ids.notaPeriodosVeiculo) ids.notaPeriodosVeiculo.style.display = temTodosPeriodos(dfVeic) ? "none" : "block";
-      if (ids.notaPeriodosCategoria) ids.notaPeriodosCategoria.style.display = temTodosPeriodos(dfCatPeriodo) ? "none" : "block";
+      if (ids.notaPeriodosVeiculo) ids.notaPeriodosVeiculo.style.display = temTodosPeriodos ? "none" : "block";
+      if (ids.notaPeriodosCategoria) ids.notaPeriodosCategoria.style.display = temTodosPeriodos ? "none" : "block";
     }
 
-    function corEER(valor) {
-      const v = Number(valor);
-      if (!Number.isFinite(v)) return "lightgray";
+    function corEER {
+      const v = Number;
+      if (!Number.isFinite) return "lightgray";
       if (v >= 90) return "#4B0082";
       if (v >= 80) return "#08519C";
       if (v >= 70) return "#3182BD";
@@ -539,9 +539,9 @@
       return "#D71920";
     }
 
-    function classeEER(valor) {
-      const v = Number(valor);
-      if (!Number.isFinite(v)) return "Sem dados";
+    function classeEER {
+      const v = Number;
+      if (!Number.isFinite) return "Sem dados";
       if (v >= 90) return "Excelente";
       if (v >= 80) return "Muito bom";
       if (v >= 70) return "Bom";
@@ -558,7 +558,7 @@
       return `${base}<br>(${periodo} meses)`;
     }
 
-    function tituloGeral(periodo) {
+    function tituloGeral {
       return isMobile()
         ? `EER - ranking geral<br>(${periodo} meses)`
         : `Eficiência Econômica de Reposição - ranking geral (${periodo} meses)`;
@@ -576,8 +576,8 @@
         .sort((a, b) => Number(a.periodo_meses) - Number(b.periodo_meses));
 
       if (ordenado.length === 0) {
-        Plotly.purge(divId);
-        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este indicador.</div>';
+        Plotly.purge;
+        document.getElementById.innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este indicador.</div>';
         return;
       }
 
@@ -602,7 +602,7 @@
           ? "Período: %{x} meses<br>EER: %{text}<br>Classe: %{customdata}<extra></extra>"
           : "Período: %{x} meses<br>Valor: %{text}<extra></extra>"
       };
-      const layout = layoutBase(titulo, "Período de troca (meses)", eixoY, 420);
+      const layout = layoutBase(titulo, "Período de troca", eixoY, 420);
       layout.xaxis.tickmode = "array";
       layout.xaxis.tickvals = [12, 24, 36, 48, 60];
       layout.yaxis.range = [0, maxY * 1.22];
@@ -612,11 +612,11 @@
     function plotCategoria(divId, df, coluna, titulo, eixoX, percentual = false, maiorMelhor = false) {
       let ordenado = [...df].filter(d => valorValido(d[coluna]));
       ordenado = ordenado.sort((a, b) => Number(a[coluna]) - Number(b[coluna]));
-      if (maiorMelhor) ordenado = ordenado.sort((a, b) => Number(b[coluna]) - Number(a[coluna]));
+      if ordenado = ordenado.sort((a, b) => Number(b[coluna]) - Number(a[coluna]));
 
       if (ordenado.length === 0) {
-        Plotly.purge(divId);
-        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este indicador.</div>';
+        Plotly.purge;
+        document.getElementById.innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este indicador.</div>';
         return;
       }
 
@@ -659,8 +659,8 @@
       ordenado = ordenado.sort((a, b) => Number(b.eer_calculada) - Number(a.eer_calculada));
 
       if (ordenado.length === 0) {
-        Plotly.purge(divId);
-        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis de EER para este período.</div>';
+        Plotly.purge;
+        document.getElementById.innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis de EER para este período.</div>';
         return;
       }
 
@@ -720,8 +720,8 @@
         .sort((a, b) => Number(a.valor_mensal_total_esperado) - Number(b.valor_mensal_total_esperado));
 
       if (ordenado.length === 0) {
-        Plotly.purge(divId);
-        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este veículo no período selecionado.</div>';
+        Plotly.purge;
+        document.getElementById.innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para este veículo no período selecionado.</div>';
         return;
       }
 
@@ -752,7 +752,7 @@
     }
 
     function preencherPeriodos() {
-      const periodos = unicoOrdenado(dados.map(d => d.periodo_meses)).sort((a, b) => Number(a) - Number(b));
+      const periodos = unicoOrdenado(dados.map(d => d.periodo_meses)).sort((a, b) => Number - Number);
       preencherSelect(ids.periodo, periodos);
       preencherSelect(ids.periodoEstados, periodos);
       preencherSelect(ids.periodoGeral, periodos);
@@ -761,7 +761,7 @@
       definirSelectSeExiste(ids.periodoGeral, "24");
     }
 
-    function atualizarFiltros(nivel) {
+    function atualizarFiltros {
       if (nivel <= 1) {
         preencherSelect(ids.categoria, unicoOrdenado(dados.filter(d => d.uf === ids.uf.value).map(d => d.categoria)));
       }
@@ -800,7 +800,7 @@
       if (!existePeriodo) {
         ids.aviso.style.display = "block";
         ids.aviso.textContent = `Não há estimativa disponível para ${ids.veiculo.value} no período de ${periodo} meses. Por isso, os gráficos comparativos não são exibidos.`;
-        divsCat.forEach(id => Plotly.purge(id));
+        divsCat.forEach(id => Plotly.purge);
       } else {
         ids.aviso.style.display = "none";
         plotCategoria("grafico-fipe-categoria", dfCatPeriodo, "perc_fipe_0km_requerido_mes", tituloCategoria("% FIPE zero-km requerido ao mês", periodo, "fipe"), "% da FIPE zero-km / mês", true, false);
@@ -843,7 +843,7 @@
       plotGeralEER(
         "grafico-eer-geral",
         dfGeralPeriodo,
-        tituloGeral(periodoGeral)
+        tituloGeral
       );
     }
 
@@ -860,7 +860,7 @@
       download: true,
       header: true,
       dynamicTyping: true,
-      complete: function(results) {
+      complete: function {
         dados = results.data
           .filter(d => d.uf && d.categoria && d.veiculo)
           .map(d => ({
@@ -878,13 +878,13 @@
         atualizarFiltros(1);
 
         const categoriaEncontrada = [...ids.categoria.options].find(opt => opt.value.toLowerCase().includes("suv"));
-        if (categoriaEncontrada) ids.categoria.value = categoriaEncontrada.value;
+        if ids.categoria.value = categoriaEncontrada.value;
         atualizarFiltros(2);
         atualizarGraficos();
       },
-      error: function(err) {
+      error: function {
         alert("Erro ao carregar o CSV. Confira se o arquivo está em data/veiculos_brasil_tidy.csv");
-        console.error(err);
+        console.error;
       }
     });
   </script>
