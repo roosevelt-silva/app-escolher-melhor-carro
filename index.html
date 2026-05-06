@@ -315,7 +315,7 @@
 
     <section>
       <h2>4. Comparação geral de eficiência com todos os veículos</h2>
-      <p class="explica">Esta seção compara o veículo selecionado com todos os modelos disponíveis na base, considerando todas as categorias no mesmo estado (UF). A comparação usa somente a <strong>Eficiência Econômica de Reposição (EER)</strong>, permitindo verificar a posição geral do veículo no mercado para o período escolhido. As barras mantêm a cor da classificação da EER, e o veículo selecionado aparece identificado diretamente no rótulo da barra.</p>
+      <p class="explica">Esta seção compara o veículo selecionado com todos os modelos disponíveis na base, considerando todas as categorias no mesmo estado (UF). A comparação usa somente a <strong>Eficiência Econômica de Reposição (EER)</strong>, permitindo verificar a posição geral do veículo no mercado para o período escolhido. As barras mantêm a cor da classificação da EER, e o veículo selecionado recebe um contorno de destaque para facilitar sua identificação no ranking.</p>
       <section class="painel">
         <label for="periodo-geral">Selecione o período para comparação geral</label>
         <select id="periodo-geral"></select>
@@ -665,16 +665,10 @@
       }
 
       const x = ordenado.map(d => Number(d.eer_calculada));
-      const y = ordenado.map(d => {
-        const selecionado = d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value;
-        return selecionado ? `► ${d.veiculo} (${d.categoria})` : `${d.veiculo} (${d.categoria})`;
-      });
+      const selecionado = ordenado.map(d => d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value);
+      const y = ordenado.map(d => `${d.veiculo} (${d.categoria})`);
       const cores = ordenado.map(d => corEER(Number(d.eer_calculada)));
-      const labels = ordenado.map(d => {
-        const eer = numeroBR(Number(d.eer_calculada), "percentual");
-        const selecionado = d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value;
-        return selecionado ? `Seu veículo: ${d.veiculo}<br>${eer}` : eer;
-      });
+      const labels = ordenado.map(d => numeroBR(Number(d.eer_calculada), "percentual"));
       const classes = ordenado.map(d => classeEER(Number(d.eer_calculada)));
       const custom = ordenado.map(d => [d.categoria, d.marca, classeEER(Number(d.eer_calculada)), d.veiculo]);
 
@@ -685,7 +679,13 @@
         y,
         text: labels,
         textposition: "outside",
-        marker: { color: cores },
+        marker: {
+          color: cores,
+          line: {
+            width: selecionado.map(v => v ? 3 : 0),
+            color: selecionado.map(v => v ? "#000000" : "rgba(0,0,0,0)")
+          }
+        },
         cliponaxis: false,
         customdata: custom,
         hovertemplate: "Veículo: %{customdata[3]}<br>Categoria: %{customdata[0]}<br>EER: %{x:.2f}%<br>Classe: %{customdata[2]}<extra></extra>"
@@ -876,4 +876,3 @@
   </script>
 </body>
 </html>
-
