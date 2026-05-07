@@ -188,6 +188,79 @@
       color: #52606d;
     }
 
+    .decisao-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin: 14px 0 24px;
+    }
+    .decisao-card {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      background: linear-gradient(135deg, #f8fafc, #eef6ff);
+      border: 1px solid #d9e2ec;
+      border-left: 5px solid var(--azul2);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(11, 58, 102, 0.06);
+      position: relative;
+      min-height: 118px;
+    }
+    .decisao-card.verde { border-left-color: var(--verde); }
+    .decisao-card.laranja { border-left-color: var(--laranja); }
+    .decisao-card.roxo { border-left-color: var(--roxo); }
+    .decisao-card.vermelho { border-left-color: var(--vermelho); }
+    .decisao-card.cinza { border-left-color: #6b7280; }
+    .decisao-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--azul);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+    .decisao-card .rotulo {
+      color: var(--azul);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 5px;
+    }
+    .decisao-card .valor {
+      color: var(--azul);
+      font-size: 1.24rem;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+    .decisao-card .detalhe {
+      color: #52606d;
+      font-size: 0.84rem;
+      line-height: 1.35;
+      margin-top: 6px;
+    }
+    .selo-vitoria {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 6px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: #fff7cc;
+      color: #7c4700;
+      border: 1px solid #f0c419;
+      font-size: 0.76rem;
+      font-weight: 900;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
     .hero-badges {
       display: flex;
       flex-wrap: wrap;
@@ -266,40 +339,6 @@
       font-size: 0.9rem;
       line-height: 1.4;
     }
-    .decisao-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin: 18px 0 24px;
-    }
-    .decisao-card {
-      background: #ffffff;
-      border: 1px solid #d9e2ec;
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 3px 10px rgba(11, 58, 102, 0.06);
-    }
-    .decisao-card .rotulo {
-      color: #52606d;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin-bottom: 8px;
-    }
-    .decisao-card .valor {
-      color: var(--azul);
-      font-size: 1.35rem;
-      font-weight: 800;
-      line-height: 1.15;
-    }
-    .decisao-card .detalhe {
-      color: #52606d;
-      font-size: 0.86rem;
-      line-height: 1.35;
-      margin-top: 8px;
-    }
-
     .decisao-chamada {
       background: linear-gradient(135deg, #ffffff, #eef6ff);
       border: 1px solid #d9e2ec;
@@ -457,37 +496,74 @@
         </div>
       </div>
     </section>
+    <h3 style="margin-top:24px;">RESUMO DA DECISÃO ECONÔMICA</h3>
+    <p style="font-size:0.9rem; color:#52606d; margin-top:6px;">
+      Síntese automática dos principais indicadores para o veículo selecionado:
+    </p>
+
     <section class="decisao-grid" aria-label="Resumo da decisão econômica">
-      <div class="decisao-card">
-        <div class="rotulo">Eficiência de Reposição</div>
-        <div id="card-score" class="valor"><span class="score-pill" style="background:#7b8794;">—</span></div>
-        <div id="card-score-detalhe" class="detalhe">Classificação calculada pela EER, que resume a eficiência econômica da reposição.</div>
+      <div class="decisao-card roxo">
+        <div class="decisao-icon" aria-hidden="true">★</div>
+        <div>
+          <div class="rotulo">Eficiência de Reposição</div>
+          <div id="card-score" class="valor"><span class="score-pill" style="background:#7b8794;">—</span></div>
+          <div id="card-score-detalhe" class="detalhe">Classificação calculada pela EER, que resume a eficiência econômica da reposição.</div>
+        </div>
+      </div>
+      
+      <div class="decisao-card verde">
+        <div class="decisao-icon" aria-hidden="true">✓</div>
+        <div>
+          <div class="rotulo">Momento ideal estimado</div>
+          <div id="card-melhor-periodo" class="valor">—</div>
+          <div id="card-melhor-periodo-detalhe" class="detalhe">Selecione um veículo para calcular o melhor ciclo.</div>
+        </div>
+      </div>
+
+      <div class="decisao-card laranja">
+        <div class="decisao-icon" aria-hidden="true">R$</div>
+        <div>
+          <div class="rotulo">Custo real no melhor ciclo</div>
+          <div id="card-custo-real" class="valor">—</div>
+          <div id="card-custo-real-detalhe" class="detalhe">Valor mensal estimado para manter e repor o veículo.</div>
+        </div>
+      </div>
+
+      <div class="decisao-card vermelho">
+        <div class="decisao-icon" aria-hidden="true">Σ</div>
+        <div>
+          <div class="rotulo">Custo acumulado em 24 meses</div>
+          <div id="card-custo-acumulado-24" class="valor">—</div>
+          <div id="card-custo-acumulado-24-detalhe" class="detalhe">Custo mensal estimado multiplicado por 24 meses.</div>
+        </div>
       </div>
       
       <div class="decisao-card">
-        <div class="rotulo">Momento ideal estimado</div>
-        <div id="card-melhor-periodo" class="valor">—</div>
-        <div id="card-melhor-periodo-detalhe" class="detalhe">Selecione um veículo para calcular o melhor ciclo.</div>
+        <div class="decisao-icon" aria-hidden="true">#</div>
+        <div>
+          <div class="rotulo">Ranking na categoria (24 meses)</div>
+          <div id="card-ranking-categoria" class="valor">—</div>
+          <div id="card-ranking-categoria-detalhe" class="detalhe">Posição da eficiência do veículo entre os modelos da mesma categoria.</div>
+        </div>
       </div>
 
-      <div class="decisao-card">
-        <div class="rotulo">Custo real no melhor ciclo</div>
-        <div id="card-custo-real" class="valor">—</div>
-        <div id="card-custo-real-detalhe" class="detalhe">Valor mensal estimado para manter e repor o veículo.</div>
-      </div>
-      
-      <div class="decisao-card">
-        <div class="rotulo">Ranking na categoria (24 meses)</div>
-        <div id="card-ranking-categoria" class="valor">—</div>
-        <div id="card-ranking-categoria-detalhe" class="detalhe">Posição da eficiência do veículo entre os modelos da mesma categoria.</div>
-      </div>
-      <div class="decisao-card">
-        <div class="rotulo">Ranking geral (24 meses)</div>
-        <div id="card-ranking-geral" class="valor">—</div>
-        <div id="card-ranking-geral-detalhe" class="detalhe">Posição da eficiência do veículo considerando todos os modelos da base na UF.</div>
+      <div class="decisao-card cinza">
+        <div class="decisao-icon" aria-hidden="true">BR</div>
+        <div>
+          <div class="rotulo">Ranking geral (24 meses)</div>
+          <div id="card-ranking-geral" class="valor">—</div>
+          <div id="card-ranking-geral-detalhe" class="detalhe">Posição da eficiência do veículo considerando todos os modelos da base na UF.</div>
+        </div>
       </div>
 
-
+      <div class="decisao-card verde">
+        <div class="decisao-icon" aria-hidden="true">UF</div>
+        <div>
+          <div class="rotulo">Estado mais barato</div>
+          <div id="card-estado-mais-barato" class="valor">—</div>
+          <div id="card-estado-mais-barato-detalhe" class="detalhe">UF com menor custo mensal para este veículo no ciclo de 24 meses.</div>
+        </div>
+      </div>
     </section>
 
     <section>
@@ -703,6 +779,10 @@
       cardRankingGeralDetalhe: document.getElementById("card-ranking-geral-detalhe"),
       cardCustoReal: document.getElementById("card-custo-real"),
       cardCustoRealDetalhe: document.getElementById("card-custo-real-detalhe"),
+      cardCustoAcumulado24: document.getElementById("card-custo-acumulado-24"),
+      cardCustoAcumulado24Detalhe: document.getElementById("card-custo-acumulado-24-detalhe"),
+      cardEstadoMaisBarato: document.getElementById("card-estado-mais-barato"),
+      cardEstadoMaisBaratoDetalhe: document.getElementById("card-estado-mais-barato-detalhe"),
       cardScore: document.getElementById("card-score"),
       cardScoreDetalhe: document.getElementById("card-score-detalhe"),
       graficoCustoAcumuladoCategoria: document.getElementById("grafico-custo-acumulado-categoria")
@@ -1016,6 +1096,18 @@
       return `${Number(posicao)}º`;
     }
 
+
+    function seloTop3(posicao) {
+      const p = Number(posicao);
+      if (!Number.isFinite(p) || p < 1 || p > 3) return "";
+      const simbolo = p === 1 ? "🏆" : p === 2 ? "🥈" : "🥉";
+      return `<span class="selo-vitoria">${simbolo} Top ${p}</span>`;
+    }
+
+    function valorComSelo(valor, posicao) {
+      return `${valor}${seloTop3(posicao)}`;
+    }
+
     function calcularRanking(dfRanking, veiculo, categoria = null) {
       let base = [...dfRanking].filter(d => valorValido(d.eer_calculada));
       if (categoria !== null) base = base.filter(d => d.categoria === categoria);
@@ -1177,6 +1269,10 @@
         ids.cardRankingGeralDetalhe.textContent = "Sem EER para calcular a posição geral.";
         ids.cardCustoReal.textContent = "—";
         ids.cardCustoRealDetalhe.textContent = "Escolha outro veículo ou UF para consultar.";
+        ids.cardCustoAcumulado24.textContent = "—";
+        ids.cardCustoAcumulado24Detalhe.textContent = "Sem custo mensal disponível no ciclo de 24 meses.";
+        ids.cardEstadoMaisBarato.textContent = "—";
+        ids.cardEstadoMaisBaratoDetalhe.textContent = "Sem dados para comparar UFs no ciclo de 24 meses.";
         ids.cardScore.innerHTML = '<span class="score-pill" style="background:#7b8794;">—</span>';
         ids.cardScoreDetalhe.textContent = "Sem EER calculada.";
         return;
@@ -1207,15 +1303,15 @@
       const rankingCategoria = calcularRanking(dfRankingPeriodo, ids.veiculo.value, ids.categoria.value);
       const rankingGeral = calcularRanking(dfRankingPeriodo, ids.veiculo.value, null);
 
-      ids.cardRankingCategoria.textContent = rankingCategoria.posicao !== null
-        ? `${ordinalBR(rankingCategoria.posicao)} de ${rankingCategoria.total}`
+      ids.cardRankingCategoria.innerHTML = rankingCategoria.posicao !== null
+        ? valorComSelo(`${ordinalBR(rankingCategoria.posicao)} de ${rankingCategoria.total}`, rankingCategoria.posicao)
         : "—";
       ids.cardRankingCategoriaDetalhe.textContent = rankingCategoria.posicao !== null
         ? `Entre os veículos da categoria ${ids.categoria.value}, na UF ${ids.uf.value}, sempre considerando o ciclo fixo de 24 meses.`
         : `Sem EER disponível em 24 meses para posicionar este veículo na categoria.`;
 
-      ids.cardRankingGeral.textContent = rankingGeral.posicao !== null
-        ? `${ordinalBR(rankingGeral.posicao)} de ${rankingGeral.total}`
+      ids.cardRankingGeral.innerHTML = rankingGeral.posicao !== null
+        ? valorComSelo(`${ordinalBR(rankingGeral.posicao)} de ${rankingGeral.total}`, rankingGeral.posicao)
         : "—";
       ids.cardRankingGeralDetalhe.textContent = rankingGeral.posicao !== null
         ? `Entre todos os veículos analisados na UF ${ids.uf.value}, sempre considerando o ciclo fixo de 24 meses.`
@@ -1225,6 +1321,37 @@
       ids.cardCustoRealDetalhe.textContent = perc !== null
         ? `Equivale a ${numeroBR(perc, "percentual")} da FIPE zero-km por mês.`
         : `Custo mensal estimado no ciclo selecionado.`;
+
+      const registro24 = dfVeic.find(d => Number(d.periodo_meses) === 24 && valorValido(d.valor_mensal_total_esperado));
+      if (registro24) {
+        const custo24 = Number(registro24.valor_mensal_total_esperado);
+        ids.cardCustoAcumulado24.textContent = numeroBR(custo24 * 24, "moeda");
+        ids.cardCustoAcumulado24Detalhe.textContent = `Estimativa baseada em ${numeroBR(custo24, "moeda")} por mês no ciclo fixo de 24 meses.`;
+      } else {
+        ids.cardCustoAcumulado24.textContent = "—";
+        ids.cardCustoAcumulado24Detalhe.textContent = "Sem custo mensal disponível no ciclo de 24 meses para este veículo.";
+      }
+
+      const dfEstados24 = dados
+        .filter(d =>
+          d.categoria === ids.categoria.value &&
+          d.veiculo === ids.veiculo.value &&
+          Number(d.periodo_meses) === 24 &&
+          valorValido(d.valor_mensal_total_esperado)
+        )
+        .sort((a, b) => Number(a.valor_mensal_total_esperado) - Number(b.valor_mensal_total_esperado));
+
+      if (dfEstados24.length > 0) {
+        const melhorUF = dfEstados24[0];
+        const posUFSelecionada = dfEstados24.findIndex(d => d.uf === ids.uf.value) + 1;
+        ids.cardEstadoMaisBarato.innerHTML = valorComSelo(`${melhorUF.uf} — ${numeroBR(Number(melhorUF.valor_mensal_total_esperado), "moeda")}`, posUFSelecionada === 1 ? 1 : null);
+        ids.cardEstadoMaisBaratoDetalhe.textContent = posUFSelecionada > 0
+          ? `A UF selecionada (${ids.uf.value}) está na posição ${ordinalBR(posUFSelecionada)} de ${dfEstados24.length} no custo mensal de 24 meses.`
+          : `Menor custo mensal entre as UFs disponíveis no ciclo fixo de 24 meses.`;
+      } else {
+        ids.cardEstadoMaisBarato.textContent = "—";
+        ids.cardEstadoMaisBaratoDetalhe.textContent = "Sem dados para comparar UFs no ciclo de 24 meses.";
+      }
 
       ids.cardScore.innerHTML = `<span class="score-pill" style="background:${cor};">${classe}</span>`;
       ids.cardScoreDetalhe.textContent = eer !== null
