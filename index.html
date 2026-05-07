@@ -943,28 +943,28 @@
         plot_bgcolor: "white",
         dragmode: false,
         showlegend: false,
-        annotations: [
-          {
-            x: 0,
-            y: -0.18,
-            xref: "paper",
-            yref: "paper",
-            text: "Menor custo acumulado",
-            showarrow: false,
-            font: { color: "#0f9d58", size: isMobile() ? 10 : 12 },
-            xanchor: "left"
-          },
-          {
-            x: 1,
-            y: -0.18,
-            xref: "paper",
-            yref: "paper",
-            text: "Maior custo acumulado",
-            showarrow: false,
-            font: { color: "#d71920", size: isMobile() ? 10 : 12 },
-            xanchor: "right"
-          }
-        ]
+       // annotations: [
+       //   {
+       //     x: 0,
+       //     y: -0.18,
+       //     xref: "paper",
+       //     yref: "paper",
+       //     text: "Menor custo acumulado",
+       //     showarrow: false,
+       //     font: { color: "#0f9d58", size: isMobile() ? 10 : 12 },
+       //     xanchor: "left"
+       //   },
+       //   {
+       //     x: 1,
+       //     y: -0.18,
+       //     xref: "paper",
+       //     yref: "paper",
+       //     text: "Maior custo acumulado",
+       //     showarrow: false,
+       //     font: { color: "#d71920", size: isMobile() ? 10 : 12 },
+       //     xanchor: "right"
+       //   }
+       // ]
       };
 
       Plotly.newPlot(divId, [trace], layout, plotConfig);
