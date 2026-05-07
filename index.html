@@ -485,16 +485,6 @@
       </div>
     </section>
 
-    <section class="resumo-comparativo" aria-label="Comparativo de custo acumulado no melhor ciclo">
-      <h3>Custo acumulado no melhor ciclo — comparativo na categoria</h3>
-      <p>O gráfico compara o custo mensal estimado multiplicado pelo número de meses do melhor ciclo do veículo selecionado. Quanto menor o custo acumulado, melhor a posição econômica no período.</p>
-      <div id="grafico-custo-acumulado-categoria" class="grafico-resumo"></div>
-      <div class="chamada-rolagem-curta">
-        <span class="icone-seta">↓</span>
-        <span><strong>Role para ver os gráficos completos.</strong> Abaixo estão o custo mensal, o percentual da FIPE por mês, a EER e as comparações detalhadas com os demais veículos.</span>
-      </div>
-    </section>
-
     <section>
       <h2>1. Melhor ciclo de troca para o veículo selecionado</h2>
       <p class="explica">Os três gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A leitura principal é simples: quanto menor o custo mensal e maior a EER, mais eficiente tende a ser aquele ciclo de troca.</p>
@@ -536,6 +526,10 @@
       <h3>Custo real mensal estimado</h3>
       <p class="explica">Compara o impacto financeiro mensal em reais.</p>
       <div id="grafico-custo-categoria" class="grafico"></div>
+
+      <h3>Custo acumulado no período selecionado</h3>
+      <p class="explica">Mostra o custo mensal estimado multiplicado pelo número de meses do período escolhido. Esse gráfico ajuda a visualizar a diferença acumulada entre os veículos da categoria. Quanto menor, melhor.</p>
+      <div id="grafico-custo-acumulado-categoria" class="grafico"></div>
 
       <h3>Percentual FIPE zero-km requerido ao mês</h3>
       <p class="explica">Compara o custo proporcional dos veículos da categoria. É útil para indicar a eficiência independentemente do preço absoluto do carro.</p>
@@ -846,38 +840,24 @@
         .sort((a, b) => Number(a.valor_mensal_total_esperado) - Number(b.valor_mensal_total_esperado))[0] || null;
     }
 
-    function plotCustoAcumuladoCategoria(dfVeic) {
-      const melhor = melhorRegistroVeiculo(dfVeic);
+    function plotCustoAcumuladoCategoria(dfCatPeriodo, periodo) {
       const divId = "grafico-custo-acumulado-categoria";
       const div = document.getElementById(divId);
 
-      if (!melhor || !valorValido(melhor.periodo_meses)) {
-        Plotly.purge(divId);
-        div.innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para calcular o custo acumulado.</div>';
-        return;
-      }
-
-      const periodo = Number(melhor.periodo_meses);
-      let base = dados
-        .filter(d =>
-          d.uf === ids.uf.value &&
-          d.categoria === ids.categoria.value &&
-          Number(d.periodo_meses) === periodo &&
-          valorValido(d.valor_mensal_total_esperado)
-        )
+      let base = [...dfCatPeriodo]
+        .filter(d => valorValido(d.valor_mensal_total_esperado))
         .map(d => ({
           ...d,
-          custo_acumulado: Number(d.valor_mensal_total_esperado) * periodo
+          custo_acumulado: Number(d.valor_mensal_total_esperado) * Number(periodo)
         }))
         .sort((a, b) => Number(a.custo_acumulado) - Number(b.custo_acumulado));
 
       if (base.length === 0) {
         Plotly.purge(divId);
-        div.innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados da categoria para o melhor ciclo encontrado.</div>';
+        div.innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para calcular o custo acumulado no período selecionado.</div>';
         return;
       }
 
-      const selecionadoIndex = base.findIndex(d => d.veiculo === ids.veiculo.value);
       const x = base.map(d => Number(d.custo_acumulado));
       const y = base.map(d => d.veiculo);
       const cores = base.map(d => d.veiculo === ids.veiculo.value ? "#d71920" : "#9bb7d4");
@@ -905,7 +885,7 @@
         },
         cliponaxis: false,
         customdata: custom,
-        hovertemplate: "%{customdata[0]}<br>Custo acumulado: %{customdata[1]}<br>Custo mensal: %{customdata[2]}<br>Ciclo: %{customdata[3]} meses<extra></extra>"
+        hovertemplate: "%{customdata[0]}<br>Custo acumulado: %{customdata[1]}<br>Custo mensal: %{customdata[2]}<br>Período: %{customdata[3]} meses<extra></extra>"
       };
 
       const tickText = base.map(d => {
@@ -920,8 +900,8 @@
       const layout = {
         title: {
           text: isMobile()
-            ? `Custo acumulado no melhor ciclo<br>comparativo na categoria (${periodo} meses)`
-            : `Custo acumulado no melhor ciclo — comparativo na categoria (${periodo} meses)`,
+            ? `Custo acumulado<br>na categoria (${periodo} meses)`
+            : `Custo acumulado no período selecionado — categoria (${periodo} meses)`,
           font: { size: isMobile() ? 13 : 16 },
           x: 0.5,
           xanchor: "center"
@@ -1288,7 +1268,6 @@
       );
 
       atualizarCardsDecisao(dfVeic);
-      plotCustoAcumuladoCategoria(dfVeic);
       atualizarNotasPeriodos(dfVeic, dfCatPeriodo);
 
       plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE zero-km requerido ao mês", "% da FIPE zero-km / mês", true);
@@ -1299,7 +1278,7 @@
         Number(d.periodo_meses) === periodo &&
         (valorValido(d.perc_fipe_0km_requerido_mes) || valorValido(d.valor_mensal_total_esperado) || valorValido(d.eer_calculada))
       );
-      const divsCat = ["grafico-fipe-categoria", "grafico-custo-categoria", "grafico-eer-categoria"];
+      const divsCat = ["grafico-fipe-categoria", "grafico-custo-categoria", "grafico-custo-acumulado-categoria", "grafico-eer-categoria"];
 
       if (!existePeriodo) {
         ids.aviso.style.display = "block";
@@ -1309,6 +1288,7 @@
         ids.aviso.style.display = "none";
         plotCategoria("grafico-fipe-categoria", dfCatPeriodo, "perc_fipe_0km_requerido_mes", tituloCategoria("% FIPE zero-km requerido ao mês", periodo, "fipe"), "% da FIPE zero-km / mês", true, false);
         plotCategoria("grafico-custo-categoria", dfCatPeriodo, "valor_mensal_total_esperado", tituloCategoria("Custo real mensal estimado", periodo, "custo"), "R$ por mês", false, false);
+        plotCustoAcumuladoCategoria(dfCatPeriodo, periodo);
         plotCategoria("grafico-eer-categoria", dfCatPeriodo, "eer_calculada", tituloCategoria("Índice de Eficiência de Troca - EER", periodo, "eer"), "EER (%)", false, true);
       }
 
