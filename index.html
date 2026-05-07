@@ -497,8 +497,8 @@
       <p class="explica">Indica qual parcela mensal do valor FIPE do veículo zero-quilômetro é consumida para sustentar o uso e viabilizar a reposição. Quanto menor esse percentual, menor tende a ser o esforço financeiro proporcional.</p>
       <div id="grafico-fipe-periodos" class="grafico"></div>
 
-      <h3>Índice de Eficiência de Troca - EER</h3>
-      <p class="explica">A EER resume a qualidade econômica da decisão. Valores maiores indicam melhor equilíbrio entre custo mensal, custo proporcional e reposição do veículo. As cores funcionam como uma leitura rápida do resultado.</p>
+      <h3>Índice de Eficiência Econômica de Reposição - EER</h3>
+      <p class="explica">A EER resume a qualidade econômica da decisão. Valores maiores indicam melhor equilíbrio entre custo mensal, custo proporcional e reposição do veículo. As cores definem a qualidade da decisão.</p>
       <div id="grafico-eer-periodos" class="grafico"></div>
       <div class="legenda-eer" aria-label="Legenda da classificação da EER">
         <strong>Classificação da EER:</strong>
@@ -535,7 +535,7 @@
       <p class="explica">Compara o custo proporcional dos veículos da categoria. É útil para indicar a eficiência independentemente do preço absoluto do carro.</p>
       <div id="grafico-fipe-categoria" class="grafico"></div>
 
-      <h3>Índice de Eficiência de Troca - EER</h3>
+      <h3>Índice de Eficiência Econômica de Reposição - EER</h3>
       <p class="explica">Mostra o posicionamento final do veículo frente aos concorrentes da categoria. Quanto maior a EER, melhor o equilíbrio econômico entre custo mensal, valor de reposição e desempenho relativo. A cor da barra do veículo selecionado qualifica a decisão.</p>
       <div id="grafico-eer-categoria" class="grafico"></div>
       <div class="legenda-eer" aria-label="Legenda da classificação da EER">
@@ -572,7 +572,7 @@
       </section>
       <div id="aviso-geral" class="aviso"></div>
 
-      <h3>Índice de Eficiência de Troca - EER: ranking geral</h3>
+      <h3>Índice de Eficiência Econômica de Reposição - EER: ranking geral</h3>
       <p class="explica">Quanto maior a EER, melhor tende a ser o equilíbrio entre custo real mensal, esforço proporcional e reposição do veículo.</p>
       <div id="grafico-eer-geral" class="grafico"></div>
       <div class="legenda-eer" aria-label="Legenda da classificação da EER">
@@ -1272,7 +1272,7 @@
 
       plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE zero-km requerido ao mês", "% da FIPE zero-km / mês", true);
       plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo real mensal estimado", "R$ por mês", false);
-      plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Índice de Eficiência de Troca - EER", "EER (%)", false);
+      plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Índice de Eficiência Econômica de Reposição - EER", "EER (%)", false);
 
       const existePeriodo = dfVeic.some(d =>
         Number(d.periodo_meses) === periodo &&
