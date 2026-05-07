@@ -467,6 +467,92 @@
       font-size: 1.05rem;
     }
 
+
+
+    .destaque-campeao{
+      position:relative;
+      overflow:hidden;
+      border-left:6px solid #d4a017;
+      background: linear-gradient(135deg,#fff8dc 0%,#ffffff 55%,#eef6ff 100%);
+      grid-column: span 2;
+    }
+    .campeao-faixa{
+      position:absolute;
+      top:0;
+      right:0;
+      background:#d4a017;
+      color:white;
+      font-weight:900;
+      font-size:0.72rem;
+      letter-spacing:.06em;
+      padding:7px 12px;
+      border-bottom-left-radius:12px;
+    }
+    .campeao-conteudo{ width:100%; padding-top:6px; }
+    .campeao-selo{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      margin-bottom:14px;
+      padding-right:130px;
+    }
+    .campeao-trofeu{
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      background:linear-gradient(135deg,#d4a017,#f5c542);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.8rem;
+      flex-shrink:0;
+      box-shadow:0 3px 10px rgba(0,0,0,.15);
+    }
+    .campeao-titulo{
+      color:var(--azul);
+      font-size:1rem;
+      font-weight:900;
+    }
+    .campeao-subtitulo{
+      color:#52606d;
+      font-size:.82rem;
+      margin-top:4px;
+      line-height:1.35;
+    }
+    .campeao-veiculo{
+      font-size:1.45rem;
+      font-weight:900;
+      color:var(--azul);
+      margin:8px 0 14px;
+      line-height:1.1;
+    }
+    .campeao-indicadores{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+    }
+    .campeao-item{
+      background:white;
+      border:1px solid #d9e2ec;
+      border-radius:12px;
+      padding:10px;
+      text-align:center;
+    }
+    .campeao-item .rotulo{
+      display:block;
+      font-size:.72rem;
+      font-weight:800;
+      color:#52606d;
+      text-transform:uppercase;
+      margin-bottom:4px;
+    }
+    .campeao-item .valor{
+      font-size:1rem;
+      font-weight:900;
+      color:var(--azul);
+      line-height:1.15;
+    }
+
     @media (max-width: 800px) {
       header h1 { font-size: 1.55rem; }
       .filtros { grid-template-columns: 1fr; }
@@ -483,6 +569,11 @@
       .chamada-detalhes-analise .chamada-icone {
         margin: 0 auto;
       }
+      .destaque-campeao{ grid-column: span 1; }
+      .campeao-selo{ padding-right:0; align-items:flex-start; }
+      .campeao-indicadores{ grid-template-columns:1fr; }
+      .campeao-veiculo{ font-size:1.2rem; }
+      .campeao-trofeu{ width:48px; height:48px; font-size:1.5rem; }
 
     }
   </style>
@@ -611,6 +702,25 @@
           <div class="rotulo">Estado mais barato</div>
           <div id="card-estado-mais-barato" class="valor">—</div>
           <div id="card-estado-mais-barato-detalhe" class="detalhe">UF com menor custo mensal para este veículo no ciclo de 24 meses.</div>
+        </div>
+      </div>
+
+      <div class="decisao-card destaque-campeao">
+        <div class="campeao-faixa">🏆 DESTAQUE ECONÔMICO</div>
+        <div class="campeao-conteudo">
+          <div class="campeao-selo">
+            <div class="campeao-trofeu" aria-hidden="true">🏆</div>
+            <div>
+              <div class="campeao-titulo">Maior eficiência econômica do veículo</div>
+              <div class="campeao-subtitulo">Melhor equilíbrio entre custo mensal, depreciação e reposição no ciclo mais eficiente.</div>
+            </div>
+          </div>
+          <div class="campeao-veiculo" id="card-campeao-veiculo">—</div>
+          <div class="campeao-indicadores">
+            <div class="campeao-item"><span class="rotulo">EER</span><span class="valor" id="card-campeao-eer">—</span></div>
+            <div class="campeao-item"><span class="rotulo">Melhor ciclo</span><span class="valor" id="card-campeao-ciclo">—</span></div>
+            <div class="campeao-item"><span class="rotulo">Custo mensal</span><span class="valor" id="card-campeao-custo">—</span></div>
+          </div>
         </div>
       </div>
     </section>
@@ -840,6 +950,10 @@
       cardCustoAcumulado24Detalhe: document.getElementById("card-custo-acumulado-24-detalhe"),
       cardEstadoMaisBarato: document.getElementById("card-estado-mais-barato"),
       cardEstadoMaisBaratoDetalhe: document.getElementById("card-estado-mais-barato-detalhe"),
+      cardCampeaoVeiculo: document.getElementById("card-campeao-veiculo"),
+      cardCampeaoEER: document.getElementById("card-campeao-eer"),
+      cardCampeaoCiclo: document.getElementById("card-campeao-ciclo"),
+      cardCampeaoCusto: document.getElementById("card-campeao-custo"),
       cardScore: document.getElementById("card-score"),
       cardScoreDetalhe: document.getElementById("card-score-detalhe"),
       graficoCustoAcumuladoCategoria: document.getElementById("grafico-custo-acumulado-categoria")
@@ -1224,7 +1338,6 @@
         y,
         text: labels,
         textposition: "outside",
-        showlegend: false,
         marker: {
           color: cores,
           line: {
@@ -1237,16 +1350,9 @@
         hovertemplate: "%{customdata[0]}<br>Custo acumulado: %{customdata[1]}<br>Custo mensal: %{customdata[2]}<br>Período: %{customdata[3]} meses<extra></extra>"
       };
 
-      const posicaoSelecionado = base.findIndex(d => d.veiculo === ids.veiculo.value) + 1;
-      const totalRanking = base.length;
-      const rankingSelecionado = posicaoSelecionado > 0 ? `${ordinalBR(posicaoSelecionado)} de ${totalRanking}` : "";
-      const prefixoRankingSelecionado = posicaoSelecionado > 0
-        ? `${posicaoSelecionado <= 3 ? (posicaoSelecionado === 1 ? "🏆 " : posicaoSelecionado === 2 ? "🥈 " : "🥉 ") : ""}${rankingSelecionado}`
-        : "";
-
       const tickText = base.map(d => {
         if (d.veiculo === ids.veiculo.value) {
-          return `<span style="color:#d71920;font-weight:700;">${d.veiculo} <span style="color:#0f9d58;font-weight:900;">${prefixoRankingSelecionado}</span></span>`;
+          return `<span style="color:#d71920;font-weight:700;">${d.veiculo}</span>`;
         }
         return d.veiculo;
       });
@@ -1338,6 +1444,10 @@
         ids.cardCustoAcumulado24Detalhe.textContent = "Sem custo mensal disponível no ciclo de 24 meses.";
         ids.cardEstadoMaisBarato.textContent = "—";
         ids.cardEstadoMaisBaratoDetalhe.textContent = "Sem dados para comparar UFs no ciclo de 24 meses.";
+        ids.cardCampeaoVeiculo.textContent = "—";
+        ids.cardCampeaoEER.textContent = "—";
+        ids.cardCampeaoCiclo.textContent = "—";
+        ids.cardCampeaoCusto.textContent = "—";
         ids.cardScore.innerHTML = '<span class="score-pill" style="background:#7b8794;">—</span>';
         ids.cardScoreDetalhe.textContent = "Sem EER calculada.";
         return;
@@ -1387,6 +1497,11 @@
         ? `Equivale a ${numeroBR(perc, "percentual")} da FIPE zero-km por mês.`
         : `Custo mensal estimado no ciclo selecionado.`;
 
+      ids.cardCampeaoVeiculo.textContent = ids.veiculo.value;
+      ids.cardCampeaoEER.textContent = eer !== null ? numeroBR(eer, "percentual") : "Sem EER";
+      ids.cardCampeaoCiclo.textContent = `${periodo} meses`;
+      ids.cardCampeaoCusto.textContent = custo !== null ? numeroBR(custo, "moeda") : "Sem custo";
+
       const registro24 = dfVeic.find(d => Number(d.periodo_meses) === 24 && valorValido(d.valor_mensal_total_esperado));
       if (registro24) {
         const custo24 = Number(registro24.valor_mensal_total_esperado);
@@ -1416,6 +1531,10 @@
       } else {
         ids.cardEstadoMaisBarato.textContent = "—";
         ids.cardEstadoMaisBaratoDetalhe.textContent = "Sem dados para comparar UFs no ciclo de 24 meses.";
+        ids.cardCampeaoVeiculo.textContent = "—";
+        ids.cardCampeaoEER.textContent = "—";
+        ids.cardCampeaoCiclo.textContent = "—";
+        ids.cardCampeaoCusto.textContent = "—";
       }
 
       ids.cardScore.innerHTML = `<span class="score-pill" style="background:${cor};">${classe}</span>`;
@@ -1578,23 +1697,11 @@
       }
 
       const x = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
-      const y = ordenado.map((d, i) => `linha_${i}`);
+      const y = ordenado.map(d => d.veiculo);
       const selecionado = ordenado.map(d => d.veiculo === ids.veiculo.value);
       const posicaoSelecionado = ordenado.findIndex(d => d.veiculo === ids.veiculo.value) + 1;
       const totalRanking = ordenado.length;
       const rankingSelecionado = posicaoSelecionado > 0 ? `${ordinalBR(posicaoSelecionado)} de ${totalRanking}` : "";
-      const destaqueRanking = posicaoSelecionado > 0
-        ? `${posicaoSelecionado <= 3 ? (posicaoSelecionado === 1 ? "🏆 " : posicaoSelecionado === 2 ? "🥈 " : "🥉 ") : ""}${rankingSelecionado}`
-        : "";
-
-      const rotulosY = ordenado.map((d, i) => {
-        const nome = d.veiculo;
-        if (selecionado[i]) {
-          return `<span style="color:#00A63E;font-weight:800;">${nome} — ${destaqueRanking}</span>`;
-        }
-        return nome;
-      });
-
       const cores = ordenado.map(d => {
         if (d.veiculo !== ids.veiculo.value) return "lightgray";
         return coluna === "eer_calculada" ? corEER(Number(d[coluna])) : "#d71920";
@@ -1605,8 +1712,7 @@
       const custom = ordenado.map((d, i) => [
         classes[i],
         selecionado[i] ? rankingSelecionado : "",
-        labels[i],
-        d.veiculo
+        labels[i]
       ]);
 
       const traceValores = {
@@ -1616,30 +1722,37 @@
         y,
         text: labels,
         textposition: "outside",
-        showlegend: false,
         marker: { color: cores },
         cliponaxis: false,
         customdata: custom,
         hovertemplate: coluna === "eer_calculada"
-          ? "%{customdata[3]}<br>EER: %{customdata[2]}<br>Ranking: %{customdata[1]}<br>Classe: %{customdata[0]}<extra></extra>"
-          : "%{customdata[3]}<br>Valor: %{customdata[2]}<br>Ranking: %{customdata[1]}<extra></extra>"
+          ? "%{y}<br>EER: %{customdata[2]}<br>Ranking: %{customdata[1]}<br>Classe: %{customdata[0]}<extra></extra>"
+          : "%{y}<br>Valor: %{customdata[2]}<br>Ranking: %{customdata[1]}<extra></extra>"
+      };
+
+      const traceRankingSelecionado = {
+        type: "bar",
+        orientation: "h",
+        x: x.map((v, i) => selecionado[i] ? v : 0),
+        y,
+        text: selecionado.map(v => v ? rankingSelecionado : ""),
+        textposition: "inside",
+        insidetextanchor: "middle",
+        textfont: { color: "white", size: isMobile() ? 18 : 24, family: "Arial, sans-serif", weight: 900 },
+        marker: { color: "rgba(0,0,0,0)" },
+        hoverinfo: "skip",
+        showlegend: false,
+        cliponaxis: false
       };
 
       const altura = Math.min(680, Math.max(420, 27 * ordenado.length));
       const layout = layoutBase(titulo, eixoX, "", altura);
-      layout.margin.l = window.innerWidth < 800 ? 150 : 300;
+      layout.margin.l = window.innerWidth < 800 ? 120 : 230;
       layout.margin.r = isMobile() ? 45 : 80;
-      layout.yaxis = {
-        automargin: true,
-        tickfont: { size: window.innerWidth < 800 ? 9 : 11 },
-        fixedrange: true,
-        tickmode: "array",
-        tickvals: y,
-        ticktext: rotulosY
-      };
+      layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 }, fixedrange: true };
       layout.xaxis.range = [0, Math.max(...x) * 1.22];
-      layout.showlegend = false;
-      Plotly.newPlot(divId, [traceValores], layout, plotConfig);
+      layout.barmode = "overlay";
+      Plotly.newPlot(divId, [traceValores, traceRankingSelecionado], layout, plotConfig);
     }
 
     function plotGeralEER(divId, df, titulo) {
@@ -1657,14 +1770,11 @@
       const posicaoSelecionado = selecionado.findIndex(v => v) + 1;
       const totalRanking = ordenado.length;
       const rankingSelecionado = posicaoSelecionado > 0 ? `${ordinalBR(posicaoSelecionado)} de ${totalRanking}` : "";
-      const destaqueRanking = posicaoSelecionado > 0
-        ? `${posicaoSelecionado <= 3 ? (posicaoSelecionado === 1 ? "🏆 " : posicaoSelecionado === 2 ? "🥈 " : "🥉 ") : ""}${rankingSelecionado}`
-        : "";
       const y = ordenado.map((d, i) => `linha_${i}`);
-      const rotulosY = ordenado.map((d, i) => {
+      const rotulosY = ordenado.map(d => {
         const nome = d.veiculo;
-        if (selecionado[i]) {
-          return `<span style="color:#00C853; font-weight:800;">${nome} — ${destaqueRanking}</span>`;
+        if (d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value) {
+          return `<span style="color:#00C853; font-weight:700;">${nome}</span>`;
         }
         return nome;
       });
@@ -1686,7 +1796,6 @@
         y,
         text: labels,
         textposition: "outside",
-        showlegend: false,
         marker: {
           color: cores,
           line: {
@@ -1699,9 +1808,24 @@
         hovertemplate: "Veículo: %{customdata[3]}<br>Categoria: %{customdata[0]}<br>EER: %{x:.2f}%<br>Ranking: %{customdata[4]}<br>Classe: %{customdata[2]}<extra></extra>"
       };
 
+      const traceRankingSelecionado = {
+        type: "bar",
+        orientation: "h",
+        x: x.map((v, i) => selecionado[i] ? v : 0),
+        y,
+        text: selecionado.map(v => v ? rankingSelecionado : ""),
+        textposition: "inside",
+        insidetextanchor: "middle",
+        textfont: { color: "white", size: isMobile() ? 20 : 28, family: "Arial, sans-serif", weight: 900 },
+        marker: { color: "rgba(0,0,0,0)" },
+        hoverinfo: "skip",
+        showlegend: false,
+        cliponaxis: false
+      };
+
       const altura = Math.min(980, Math.max(520, 23 * ordenado.length));
       const layout = layoutBase(titulo, "EER (%)", "", altura);
-      layout.margin.l = window.innerWidth < 800 ? 170 : 330;
+      layout.margin.l = window.innerWidth < 800 ? 150 : 280;
       layout.margin.r = isMobile() ? 70 : 130;
       layout.yaxis = {
         automargin: true,
@@ -1712,8 +1836,8 @@
         ticktext: rotulosY
       };
       layout.xaxis.range = [0, Math.max(...x) * 1.18];
-      layout.showlegend = false;
-      Plotly.newPlot(divId, [traceValores], layout, plotConfig);
+      layout.barmode = "overlay";
+      Plotly.newPlot(divId, [traceValores, traceRankingSelecionado], layout, plotConfig);
     }
 
     function plotEstados(divId, df, titulo, eixoX) {
