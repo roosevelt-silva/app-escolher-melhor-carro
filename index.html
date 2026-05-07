@@ -784,6 +784,13 @@
       return v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v));
     }
 
+    function normalizarChave(nome) {
+      return String(nome || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+    }
+
     function primeiroValorNumerico(obj, nomesPossiveis) {
       for (const nome of nomesPossiveis) {
         if (Object.prototype.hasOwnProperty.call(obj, nome) && valorValido(obj[nome])) {
@@ -793,33 +800,94 @@
       return null;
     }
 
+    function chavesNumericasFIPE(obj) {
+      const proibidos = ["perc", "percent", "requerido", "mes", "eer", "custo", "ipva", "seguro", "combust", "manut", "pneu", "uf", "categoria", "veiculo", "marca", "periodo"];
+      return Object.keys(obj || {}).filter(k => {
+        const nk = normalizarChave(k);
+        if (!nk.includes("fipe")) return false;
+        if (proibidos.some(p => nk.includes(p))) return false;
+        return valorValido(obj[k]) && Number(obj[k]) > 1000;
+      });
+    }
+
+    function escolherColunaFIPEZero(obj, chaves) {
+      const preferidas = ["0km", "0_km", "zero", "novo", "nova", "2026", "atual"];
+      for (const termo of preferidas) {
+        const achada = chaves.find(k => normalizarChave(k).includes(termo));
+        if (achada) return achada;
+      }
+      if (chaves.length === 0) return null;
+      return chaves
+        .map(k => ({ k, v: Number(obj[k]) }))
+        .sort((a, b) => b.v - a.v)[0].k;
+    }
+
+    function escolherColunaFIPESeminovo(obj, chaves, periodoMeses, colunaZero) {
+      const p = Number(periodoMeses);
+      const anosUso = Number.isFinite(p) ? Math.round(p / 12) : null;
+      const anoReferenciaZero = 2026;
+      const anoSeminovo = anosUso !== null ? anoReferenciaZero - anosUso : null;
+
+      const padroes = [];
+      if (anoSeminovo !== null) padroes.push(String(anoSeminovo));
+      if (Number.isFinite(p)) {
+        padroes.push(`${p}m`, `${p}_m`, `${p}-m`, `${p}mes`, `${p}_mes`, `${p}_meses`, `${p} meses`);
+      }
+      if (anosUso !== null) {
+        padroes.push(`${anosUso}ano`, `${anosUso}_ano`, `${anosUso} anos`, `${anosUso}_anos`);
+      }
+      padroes.push("usado", "seminovo", "ciclo", "periodo");
+
+      const candidatas = chaves.filter(k => k !== colunaZero);
+      for (const termo of padroes) {
+        const achada = candidatas.find(k => normalizarChave(k).includes(normalizarChave(termo)));
+        if (achada) return achada;
+      }
+      if (candidatas.length === 0) return null;
+
+      // Último recurso: para cada linha/período, usa a maior FIPE como zero-km e a menor FIPE como valor usado.
+      // Isso evita gráfico vazio quando o CSV traz apenas colunas anuais sem nomes padronizados.
+      return candidatas
+        .map(k => ({ k, v: Number(obj[k]) }))
+        .sort((a, b) => a.v - b.v)[0].k;
+    }
+
     function calcularDepreciacaoRegistro(d) {
       const percDireto = primeiroValorNumerico(d, [
         "depreciacao_percentual",
         "perc_depreciacao",
         "depreciacao_perc",
         "depreciacao_acumulada_percentual",
-        "depreciacao_fipe_percentual"
+        "depreciacao_fipe_percentual",
+        "depreciacao_acumulada",
+        "depreciacao"
       ]);
       if (percDireto !== null) {
         return percDireto <= 1 ? percDireto * 100 : percDireto;
       }
 
-      const fipe0km = primeiroValorNumerico(d, [
+      const fipe0kmDireto = primeiroValorNumerico(d, [
         "fipe_0km",
+        "fipe_0_km",
         "valor_fipe_0km",
+        "valor_fipe_0_km",
         "valor_0km",
+        "valor_0_km",
         "preco_0km",
+        "preco_0_km",
         "preco_fipe_0km",
         "fipe_zero_km",
         "valor_zero_km",
-        "fipe_atual_0km"
+        "fipe_atual_0km",
+        "fipe_2026",
+        "valor_fipe_2026"
       ]);
-      const fipeSeminovo = primeiroValorNumerico(d, [
+      const fipeSeminovoDireto = primeiroValorNumerico(d, [
         "fipe_periodo",
         "valor_fipe_periodo",
         "valor_fipe_usado",
         "fipe_usado",
+        "valor_usado",
         "valor_seminovo",
         "fipe_seminovo",
         "valor_fipe_seminovo",
@@ -827,8 +895,20 @@
         "fipe_ciclo"
       ]);
 
+      let fipe0km = fipe0kmDireto;
+      let fipeSeminovo = fipeSeminovoDireto;
+
+      const chavesFipe = chavesNumericasFIPE(d);
+      if (fipe0km === null || fipeSeminovo === null) {
+        const colZero = escolherColunaFIPEZero(d, chavesFipe);
+        const colSeminovo = escolherColunaFIPESeminovo(d, chavesFipe, d.periodo_meses, colZero);
+        if (fipe0km === null && colZero) fipe0km = Number(d[colZero]);
+        if (fipeSeminovo === null && colSeminovo) fipeSeminovo = Number(d[colSeminovo]);
+      }
+
       if (fipe0km !== null && fipeSeminovo !== null && fipe0km > 0) {
-        return ((fipe0km - fipeSeminovo) / fipe0km) * 100;
+        const dep = ((fipe0km - fipeSeminovo) / fipe0km) * 100;
+        if (Number.isFinite(dep) && dep >= -30 && dep <= 95) return Math.max(0, dep);
       }
 
       return null;
@@ -1159,7 +1239,8 @@
 
       if (ordenado.length === 0) {
         Plotly.purge(divId);
-        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;line-height:1.45;">Sem dados disponíveis para calcular a depreciação. Confira se o CSV possui uma coluna de depreciação percentual ou as colunas de FIPE zero-km e FIPE do seminovo no ciclo.</div>';
+        const chavesDetectadas = df.length ? chavesNumericasFIPE(df[0]).join(', ') : '';
+        document.getElementById(divId).innerHTML = `<div style="padding:16px;color:#52606d;font-weight:700;line-height:1.45;">Sem dados disponíveis para calcular a depreciação. Colunas FIPE numéricas detectadas nesta seleção: ${chavesDetectadas || 'nenhuma'}.</div>`;
         return;
       }
 
