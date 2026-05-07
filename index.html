@@ -12,7 +12,7 @@
 </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Custo de Reposição Automotiva no Brasil</title>
+  <title>Custo Real do Carro e Momento Ideal de Troca</title>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
@@ -187,19 +187,150 @@
       line-height: 1.35;
       color: #52606d;
     }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 14px 0 4px;
+    }
+    .hero-badges span {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      color: #f8fafc;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+    .promessa {
+      background: linear-gradient(135deg, #eef6ff, #ffffff);
+      border: 1px solid #d9e2ec;
+      border-left: 6px solid var(--azul2);
+      border-radius: 16px;
+      padding: 18px;
+      margin: 18px 0;
+      line-height: 1.55;
+      color: #334e68;
+      box-shadow: 0 4px 14px rgba(11, 58, 102, 0.06);
+    }
+    .promessa h2 {
+      border-bottom: none;
+      margin: 0 0 8px;
+      padding: 0;
+      color: var(--azul);
+      font-size: 1.35rem;
+    }
+    .promessa p { margin: 0; }
+    .perguntas-chave {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .pergunta-card {
+      background: #ffffff;
+      border: 1px solid #d9e2ec;
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .pergunta-card strong {
+      display: block;
+      color: var(--azul);
+      margin-bottom: 5px;
+      font-size: 0.96rem;
+    }
+    .pergunta-card span {
+      color: #52606d;
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+    .painel-titulo {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .painel-titulo h2 {
+      margin: 0;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .painel-titulo p {
+      margin: 4px 0 0;
+      color: #52606d;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .decisao-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin: 18px 0 24px;
+    }
+    .decisao-card {
+      background: #ffffff;
+      border: 1px solid #d9e2ec;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 3px 10px rgba(11, 58, 102, 0.06);
+    }
+    .decisao-card .rotulo {
+      color: #52606d;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 8px;
+    }
+    .decisao-card .valor {
+      color: var(--azul);
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+    .decisao-card .detalhe {
+      color: #52606d;
+      font-size: 0.86rem;
+      line-height: 1.35;
+      margin-top: 8px;
+    }
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 118px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.98rem;
+    }
+
     @media (max-width: 800px) {
       header h1 { font-size: 1.55rem; }
       .filtros { grid-template-columns: 1fr; }
       main { padding: 12px; }
       .grafico { min-height: 380px; padding: 2px; }
       .metodologia-grid { grid-template-columns: 1fr; }
+      .painel-titulo { flex-direction: column; }
+      .hero-badges span { font-size: 0.78rem; }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Custo de Reposição Automotiva no Brasil</h1>
-    <p>Uma análise do custo de troca de veículos seminovos por zero-km</p>
+    <h1>Descubra o custo real do seu carro</h1>
+    <p>Compare veículos e veja quando a troca tende a ser financeiramente mais vantajosa</p>
+    <div class="hero-badges">
+      <span>Custo real de propriedade</span>
+      <span>Momento ideal de troca</span>
+      <span>Eficiência econômica</span>
+    </div>
     <div style="width:100%; margin: 10px 0 20px 0;">
       <img src="img/banner_topo.png" 
            alt="Custo de reposição automotiva"
@@ -211,14 +342,25 @@
   </header>
 
   <main>
-    <section class="intro">
-      <strong>Sobre esta ferramenta.</strong> O objetivo é apoiar o usuário na resposta a duas perguntas centrais: <strong>qual veículo apresenta melhor desempenho econômico</strong> e <strong>qual é o período mais vantajoso para a troca</strong>. A plataforma permite comparar, de forma simples e objetiva, o custo mensal estimado para substituir um veículo seminovo — com 12, 24, 36, 48 ou 60 meses de uso — por um modelo zero-quilômetro equivalente. Além do valor absoluto, é apresentado o custo relativo, expresso como percentual da Tabela FIPE do veículo zero km, indicando quanto desse valor precisa ser provisionado mensalmente para viabilizar a reposição. Complementarmente, é introduzido o indicador de <strong>Eficiência Econômica de Reposição (EER)</strong>, que sintetiza o equilíbrio entre custo absoluto e custo relativo, permitindo qualificar a decisão de forma comparativa. Os cálculos incorporam custos com seguro, IPVA, revisões e manutenção, pneus e combustível, além do montante necessário — distribuído ao longo do tempo — para viabilizar a troca ao final de cada período analisado..
+    <section class="promessa">
+      <h2>Trocar agora, esperar mais ou escolher outro modelo?</h2>
+      <p>Esta ferramenta transforma uma decisão normalmente emocional em uma análise financeira objetiva. Ela estima quanto um veículo custa por mês de verdade, compara esse custo com modelos semelhantes e indica em qual ciclo de uso a troca tende a ser mais eficiente.</p>
+      <div class="perguntas-chave">
+        <div class="pergunta-card"><strong>Quanto este carro custa por mês?</strong><span>Inclui depreciação, IPVA, seguro, combustível, manutenção, pneus e provisão para reposição.</span></div>
+        <div class="pergunta-card"><strong>Qual período parece mais vantajoso?</strong><span>Compara ciclos de 12, 24, 36, 48 e 60 meses para mostrar onde o custo mensal se dilui melhor.</span></div>
+        <div class="pergunta-card"><strong>Ele é eficiente frente aos concorrentes?</strong><span>Mostra a posição do veículo na categoria, no estado escolhido e no ranking geral.</span></div>
+      </div>
     </section>
     <p style="margin-top:6px; font-size:0.85rem; color:#52606d;">
       São considerados apenas veículos disponíveis para venda na condição zero quilômetro e com histórico mínimo de 24 meses no mercado de seminovos. Para padronizar as comparações, foi considerada a versão topo de linha de cada modelo.
     </p>
-    <h2>Defina o veículo para análise econômica</h2>
     <section class="painel">
+      <div class="painel-titulo">
+        <div>
+          <h2>Defina seu veículo para comparação</h2>
+          <p>Escolha UF, categoria, marca e modelo para visualizar o custo real e o melhor ciclo de troca.</p>
+        </div>
+      </div>
       <div class="filtros">
         <div>
           <label for="uf">Estado / UF</label>
@@ -239,20 +381,38 @@
       </div>
     </section>
 
-    <section>
-      <h2>1. Melhor período para o veículo selecionado</h2>
-      <p class="explica">Os três gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A ideia central é identificar em qual prazo o custo mensal se dilui melhor e em qual período a Eficiência Econômica de Reposição (EER) se torna mais favorável.</p>
+    <section class="decisao-grid" aria-label="Resumo da decisão econômica">
+      <div class="decisao-card">
+        <div class="rotulo">Momento ideal estimado</div>
+        <div id="card-melhor-periodo" class="valor">—</div>
+        <div id="card-melhor-periodo-detalhe" class="detalhe">Selecione um veículo para calcular o melhor ciclo.</div>
+      </div>
+      <div class="decisao-card">
+        <div class="rotulo">Custo real no melhor ciclo</div>
+        <div id="card-custo-real" class="valor">—</div>
+        <div id="card-custo-real-detalhe" class="detalhe">Valor mensal estimado para manter e repor o veículo.</div>
+      </div>
+      <div class="decisao-card">
+        <div class="rotulo">Eficiência de troca</div>
+        <div id="card-score" class="valor"><span class="score-pill" style="background:#7b8794;">—</span></div>
+        <div id="card-score-detalhe" class="detalhe">Classificação calculada pela EER.</div>
+      </div>
+    </section>
 
-      <h3>Custo mensal estimado</h3>
-      <p class="explica">Mostra o valor mensal em reais associado às despesas em geral diluídas no período selecionado, incluindo o valor necessário para efetuar a troca do veículo seminovo por um zero-quilômetro em diferentes ciclos de troca. Esse indicador traduz o impacto direto no orçamento, incorporando depreciação e custos operacionais considerados no modelo.</p>
+    <section>
+      <h2>1. Melhor ciclo de troca para o veículo selecionado</h2>
+      <p class="explica">Os três gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A leitura principal é simples: quanto menor o custo mensal e maior a EER, mais eficiente tende a ser aquele ciclo de troca.</p>
+
+      <h3>Custo real mensal estimado</h3>
+      <p class="explica">Mostra quanto o veículo tende a custar por mês quando todos os componentes relevantes são diluídos no tempo: perda de valor, tributos, seguro, uso, manutenção e a provisão necessária para trocar por um zero-quilômetro equivalente.</p>
       <div id="grafico-custo-periodos" class="grafico"></div>
       
-      <h3>Percentual FIPE do veículo zero-km requerido ao mês</h3>
-      <p class="explica">Indica qual fração do valor FIPE do veículo zero-quilômetro precisa ser provisionada por mês para subsidiar as despesas e viabilizar a troca ao final do período. Quanto menor esse percentual, a eficiência econômica do veículo naquele ciclo tende a ser melhor.</p>
+      <h3>Percentual do valor do carro exigido por mês</h3>
+      <p class="explica">Indica qual parcela mensal do valor FIPE do veículo zero-quilômetro é consumida para sustentar o uso e viabilizar a reposição. Quanto menor esse percentual, menor tende a ser o esforço financeiro proporcional.</p>
       <div id="grafico-fipe-periodos" class="grafico"></div>
 
-      <h3>Eficiência Econômica de Reposição - EER</h3>
-      <p class="explica">A EER sintetiza o equilíbrio entre custo mensal e valor de reposição. Valores maiores indicam melhor desempenho econômico relativo dentro do critério adotado, favorecendo veículos que combinam menor custo proporcional e menor custo absoluto. As cores das barras qualificam a decisão.</p>
+      <h3>Índice de Eficiência de Troca - EER</h3>
+      <p class="explica">A EER resume a qualidade econômica da decisão. Valores maiores indicam melhor equilíbrio entre custo mensal, custo proporcional e reposição do veículo. As cores funcionam como uma leitura rápida do resultado.</p>
       <div id="grafico-eer-periodos" class="grafico"></div>
       <div class="legenda-eer" aria-label="Legenda da classificação da EER">
         <strong>Classificação da EER:</strong>
@@ -269,15 +429,15 @@
     </section>
 
     <section>
-      <h2>2. Comparação com os demais veículos da categoria</h2>
-      <p class="explica">Nesta seção, o veículo selecionado é comparado com todos os demais modelos da mesma categoria e no mesmo estado (UF). O veículo escolhido aparece destacado em vermelho. Essa comparação ajuda a entender se o modelo está entre os mais eficientes, intermediários ou menos vantajosos no período escolhido.</p>
+      <h2>2. O veículo é competitivo dentro da categoria?</h2>
+      <p class="explica">Nesta seção, o veículo selecionado é comparado com modelos da mesma categoria e no mesmo estado. O objetivo é mostrar se ele está entre as melhores escolhas econômicas, em posição intermediária ou entre as opções menos eficientes no período escolhido.</p>
       <section class="painel">
         <label for="periodo">Selecione o período de troca para comparação</label>
         <select id="periodo"></select>
       </section>
       <div id="aviso" class="aviso"></div>
       
-      <h3>Custo mensal estimado</h3>
+      <h3>Custo real mensal estimado</h3>
       <p class="explica">Compara o impacto financeiro mensal em reais.</p>
       <div id="grafico-custo-categoria" class="grafico"></div>
 
@@ -285,7 +445,7 @@
       <p class="explica">Compara o custo proporcional dos veículos da categoria. É útil para indicar a eficiência independentemente do preço absoluto do carro.</p>
       <div id="grafico-fipe-categoria" class="grafico"></div>
 
-      <h3>Eficiência Econômica de Reposição - EER</h3>
+      <h3>Índice de Eficiência de Troca - EER</h3>
       <p class="explica">Mostra o posicionamento final do veículo frente aos concorrentes da categoria. Quanto maior a EER, melhor o equilíbrio econômico entre custo mensal, valor de reposição e desempenho relativo. A cor da barra do veículo selecionado qualifica a decisão.</p>
       <div id="grafico-eer-categoria" class="grafico"></div>
       <div class="legenda-eer" aria-label="Legenda da classificação da EER">
@@ -303,27 +463,27 @@
     </section>
 
     <section>
-      <h2>3. Custo do veículo selecionado nos diferentes estados</h2>
-      <p class="explica">Mostra como o custo mensal do mesmo veículo varia entre as UFs no período selecionado. A UF escolhida nos filtros aparece destacada em vermelho.</p>
+      <h2>3. Quanto o mesmo veículo muda de custo entre estados?</h2>
+      <p class="explica">Mostra como o custo real mensal do mesmo veículo muda entre as UFs no período selecionado, principalmente por diferenças de IPVA e composição de custos. A UF escolhida nos filtros aparece destacada.</p>
       <section class="painel">
         <label for="periodo-estados">Selecione o período para comparação entre estados</label>
         <select id="periodo-estados"></select>
       </section>
-      <h3>Custo mensal estimado por UF</h3>
+      <h3>Custo real mensal estimado por UF</h3>
       <div id="grafico-custo-estados" class="grafico"></div>
     </section>
 
     <section>
-      <h2>4. Comparação geral de eficiência com todos os veículos</h2>
-      <p class="explica">Esta seção compara a <strong>Eficiência Econômica de Reposição (EER)</strong> do veículo selecionado com todos os modelos disponíveis na base, considerando todas as categorias no mesmo estado (UF). As barras mantêm a cor da classificação da EER, e o veículo selecionado recebe um contorno de destaque para facilitar sua identificação no ranking.</p>
+      <h2>4. Ranking geral de eficiência econômica</h2>
+      <p class="explica">Esta seção mostra onde o veículo selecionado aparece no ranking geral de eficiência econômica, considerando todos os modelos disponíveis na base para o mesmo estado. O veículo escolhido recebe destaque para facilitar a comparação.</p>
       <section class="painel">
         <label for="periodo-geral">Selecione o período para comparação geral</label>
         <select id="periodo-geral"></select>
       </section>
       <div id="aviso-geral" class="aviso"></div>
 
-      <h3>Eficiência Econômica de Reposição - EER: ranking geral</h3>
-      <p class="explica">Quanto maior a EER, melhor o equilíbrio econômico relativo entre custo mensal, valor de reposição e desempenho proporcional.</p>
+      <h3>Índice de Eficiência de Troca - EER: ranking geral</h3>
+      <p class="explica">Quanto maior a EER, melhor tende a ser o equilíbrio entre custo real mensal, esforço proporcional e reposição do veículo.</p>
       <div id="grafico-eer-geral" class="grafico"></div>
       <div class="legenda-eer" aria-label="Legenda da classificação da EER">
         <strong>Classificação da EER:</strong>
@@ -431,7 +591,13 @@
       avisoGeral: document.getElementById("aviso-geral"),
       notaPeriodosVeiculo: document.getElementById("nota-periodos-veiculo"),
       notaPeriodosCategoria: document.getElementById("nota-periodos-categoria"),
-      notaPeriodosGeral: document.getElementById("nota-periodos-geral")
+      notaPeriodosGeral: document.getElementById("nota-periodos-geral"),
+      cardMelhorPeriodo: document.getElementById("card-melhor-periodo"),
+      cardMelhorPeriodoDetalhe: document.getElementById("card-melhor-periodo-detalhe"),
+      cardCustoReal: document.getElementById("card-custo-real"),
+      cardCustoRealDetalhe: document.getElementById("card-custo-real-detalhe"),
+      cardScore: document.getElementById("card-score"),
+      cardScoreDetalhe: document.getElementById("card-score-detalhe")
     };
 
     const plotConfig = {
@@ -550,6 +716,49 @@
       return "Muito baixo";
     }
 
+
+    function atualizarCardsDecisao(dfVeic) {
+      const candidatos = [...dfVeic]
+        .filter(d => valorValido(d.periodo_meses) && (valorValido(d.eer_calculada) || valorValido(d.valor_mensal_total_esperado)));
+
+      if (candidatos.length === 0) {
+        ids.cardMelhorPeriodo.textContent = "—";
+        ids.cardMelhorPeriodoDetalhe.textContent = "Sem estimativas disponíveis para este veículo.";
+        ids.cardCustoReal.textContent = "—";
+        ids.cardCustoRealDetalhe.textContent = "Escolha outro veículo ou UF para consultar.";
+        ids.cardScore.innerHTML = '<span class="score-pill" style="background:#7b8794;">—</span>';
+        ids.cardScoreDetalhe.textContent = "Sem EER calculada.";
+        return;
+      }
+
+      const comEER = candidatos.filter(d => valorValido(d.eer_calculada));
+      const melhor = comEER.length > 0
+        ? comEER.sort((a, b) => Number(b.eer_calculada) - Number(a.eer_calculada))[0]
+        : candidatos.filter(d => valorValido(d.valor_mensal_total_esperado)).sort((a, b) => Number(a.valor_mensal_total_esperado) - Number(b.valor_mensal_total_esperado))[0];
+
+      const periodo = Number(melhor.periodo_meses);
+      const custo = valorValido(melhor.valor_mensal_total_esperado) ? Number(melhor.valor_mensal_total_esperado) : null;
+      const eer = valorValido(melhor.eer_calculada) ? Number(melhor.eer_calculada) : null;
+      const perc = valorValido(melhor.perc_fipe_0km_requerido_mes) ? Number(melhor.perc_fipe_0km_requerido_mes) * 100 : null;
+      const classe = classeEER(eer);
+      const cor = corEER(eer);
+
+      ids.cardMelhorPeriodo.textContent = `${periodo} meses`;
+      ids.cardMelhorPeriodoDetalhe.textContent = eer !== null
+        ? `Melhor ciclo pela EER entre os períodos disponíveis.`
+        : `Menor custo mensal entre os períodos disponíveis.`;
+
+      ids.cardCustoReal.textContent = custo !== null ? numeroBR(custo, "moeda") : "Sem custo";
+      ids.cardCustoRealDetalhe.textContent = perc !== null
+        ? `Equivale a ${numeroBR(perc, "percentual")} da FIPE zero-km por mês.`
+        : `Custo mensal estimado no ciclo selecionado.`;
+
+      ids.cardScore.innerHTML = `<span class="score-pill" style="background:${cor};">${classe}</span>`;
+      ids.cardScoreDetalhe.textContent = eer !== null
+        ? `EER de ${numeroBR(eer, "percentual")} no ciclo de ${periodo} meses.`
+        : `EER indisponível para o melhor ciclo encontrado.`;
+    }
+
     function tituloCategoria(base, periodo, tipo) {
       if (!isMobile()) return `${base} (${periodo} meses)`;
       if (tipo === "fipe") return `% FIPE zero-km<br>(${periodo} meses)`;
@@ -567,7 +776,7 @@
     function tituloEstados(veiculo, periodo) {
       return isMobile()
         ? `Custo mensal por UF<br>(${periodo} meses)`
-        : `Custo mensal estimado por UF<br>${veiculo} (${periodo} meses)`;
+        : `Custo real mensal estimado por UF<br>${veiculo} (${periodo} meses)`;
     }
 
     function plotPeriodos(divId, df, coluna, titulo, eixoY, percentual = false) {
@@ -785,11 +994,12 @@
         Number(d.periodo_meses) === periodo
       );
 
+      atualizarCardsDecisao(dfVeic);
       atualizarNotasPeriodos(dfVeic, dfCatPeriodo);
 
       plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE zero-km requerido ao mês", "% da FIPE zero-km / mês", true);
-      plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo mensal estimado", "R$ por mês", false);
-      plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Eficiência Econômica de Reposição - EER", "EER (%)", false);
+      plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo real mensal estimado", "R$ por mês", false);
+      plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Índice de Eficiência de Troca - EER", "EER (%)", false);
 
       const existePeriodo = dfVeic.some(d =>
         Number(d.periodo_meses) === periodo &&
@@ -804,8 +1014,8 @@
       } else {
         ids.aviso.style.display = "none";
         plotCategoria("grafico-fipe-categoria", dfCatPeriodo, "perc_fipe_0km_requerido_mes", tituloCategoria("% FIPE zero-km requerido ao mês", periodo, "fipe"), "% da FIPE zero-km / mês", true, false);
-        plotCategoria("grafico-custo-categoria", dfCatPeriodo, "valor_mensal_total_esperado", tituloCategoria("Custo mensal estimado", periodo, "custo"), "R$ por mês", false, false);
-        plotCategoria("grafico-eer-categoria", dfCatPeriodo, "eer_calculada", tituloCategoria("Eficiência Econômica de Reposição - EER", periodo, "eer"), "EER (%)", false, true);
+        plotCategoria("grafico-custo-categoria", dfCatPeriodo, "valor_mensal_total_esperado", tituloCategoria("Custo real mensal estimado", periodo, "custo"), "R$ por mês", false, false);
+        plotCategoria("grafico-eer-categoria", dfCatPeriodo, "eer_calculada", tituloCategoria("Índice de Eficiência de Troca - EER", periodo, "eer"), "EER (%)", false, true);
       }
 
       const dfEstados = dados.filter(d =>
