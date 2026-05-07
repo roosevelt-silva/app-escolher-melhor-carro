@@ -464,12 +464,12 @@
         <div id="card-melhor-periodo-detalhe" class="detalhe">Selecione um veículo para calcular o melhor ciclo.</div>
       </div>
       <div class="decisao-card">
-        <div class="rotulo">Ranking na categoria</div>
+        <div class="rotulo">Ranking na categoria (24 meses)</div>
         <div id="card-ranking-categoria" class="valor">—</div>
         <div id="card-ranking-categoria-detalhe" class="detalhe">Posição do veículo entre os modelos da mesma categoria.</div>
       </div>
       <div class="decisao-card">
-        <div class="rotulo">Ranking geral</div>
+        <div class="rotulo">Ranking geral (24 meses)</div>
         <div id="card-ranking-geral" class="valor">—</div>
         <div id="card-ranking-geral-detalhe" class="detalhe">Posição do veículo considerando todos os modelos da base na UF.</div>
       </div>
@@ -1000,9 +1000,10 @@
         ? `Melhor ciclo pela EER entre os períodos disponíveis.`
         : `Menor custo mensal entre os períodos disponíveis.`;
 
+      const periodoRankingResumo = 24;
       const dfRankingPeriodo = dados.filter(d =>
         d.uf === ids.uf.value &&
-        Number(d.periodo_meses) === periodo
+        Number(d.periodo_meses) === periodoRankingResumo
       );
       const rankingCategoria = calcularRanking(dfRankingPeriodo, ids.veiculo.value, ids.categoria.value);
       const rankingGeral = calcularRanking(dfRankingPeriodo, ids.veiculo.value, null);
@@ -1011,15 +1012,15 @@
         ? `${ordinalBR(rankingCategoria.posicao)} de ${rankingCategoria.total}`
         : "—";
       ids.cardRankingCategoriaDetalhe.textContent = rankingCategoria.posicao !== null
-        ? `Entre os veículos da categoria ${ids.categoria.value}, na UF ${ids.uf.value}, no ciclo de ${periodo} meses.`
-        : `Sem EER disponível para posicionar este veículo na categoria.`;
+        ? `Entre os veículos da categoria ${ids.categoria.value}, na UF ${ids.uf.value}, sempre considerando o ciclo fixo de 24 meses.`
+        : `Sem EER disponível em 24 meses para posicionar este veículo na categoria.`;
 
       ids.cardRankingGeral.textContent = rankingGeral.posicao !== null
         ? `${ordinalBR(rankingGeral.posicao)} de ${rankingGeral.total}`
         : "—";
       ids.cardRankingGeralDetalhe.textContent = rankingGeral.posicao !== null
-        ? `Entre todos os veículos analisados na UF ${ids.uf.value}, no ciclo de ${periodo} meses.`
-        : `Sem EER disponível para posicionar este veículo no ranking geral.`;
+        ? `Entre todos os veículos analisados na UF ${ids.uf.value}, sempre considerando o ciclo fixo de 24 meses.`
+        : `Sem EER disponível em 24 meses para posicionar este veículo no ranking geral.`;
 
       ids.cardCustoReal.textContent = custo !== null ? numeroBR(custo, "moeda") : "Sem custo";
       ids.cardCustoRealDetalhe.textContent = perc !== null
