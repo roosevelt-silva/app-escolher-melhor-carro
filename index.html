@@ -331,6 +331,63 @@
       font-size: 0.98rem;
     }
 
+
+    .resumo-comparativo {
+      background: #ffffff;
+      border: 1px solid #d9e2ec;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 4px 0 22px;
+      box-shadow: 0 3px 10px rgba(11, 58, 102, 0.05);
+    }
+    .resumo-comparativo h3 {
+      margin: 0 0 6px;
+      color: var(--azul);
+      font-size: 1.08rem;
+    }
+    .resumo-comparativo p {
+      margin: 0 0 12px;
+      color: #52606d;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+    .grafico-resumo {
+      width: 100%;
+      min-height: 430px;
+      border: 1px solid #e4e7eb;
+      border-radius: 12px;
+      padding: 6px;
+      background: white;
+    }
+    .chamada-rolagem-curta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #eef6ff, #ffffff);
+      border: 1px solid #d9e2ec;
+      border-left: 6px solid var(--azul2);
+      border-radius: 14px;
+      padding: 13px 15px;
+      margin: 14px 0 0;
+      color: #334e68;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+    .chamada-rolagem-curta strong { color: var(--azul); }
+    .chamada-rolagem-curta .icone-seta {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      background: var(--azul);
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.05rem;
+    }
+
     @media (max-width: 800px) {
       header h1 { font-size: 1.55rem; }
       .filtros { grid-template-columns: 1fr; }
@@ -400,13 +457,6 @@
         </div>
       </div>
     </section>
-
-    <section class="decisao-chamada" aria-label="Chamada para os resultados da análise">
-      <strong>Síntese inicial da decisão econômica.</strong>
-      Antes dos gráficos, veja rapidamente o melhor ciclo estimado para o veículo e a posição dele no ranking da própria categoria e no ranking geral da base, considerando a UF selecionada. Abaixo, ao rolar a página, os gráficos detalham o custo mensal, o percentual da FIPE exigido por mês, a EER e a comparação com os demais veículos.
-      <br><span class="seta-rolagem">Role para ver os gráficos completos e entender o resultado.</span>
-    </section>
-
     <section class="decisao-grid" aria-label="Resumo da decisão econômica">
       <div class="decisao-card">
         <div class="rotulo">Momento ideal estimado</div>
@@ -432,6 +482,16 @@
         <div class="rotulo">Eficiência de troca</div>
         <div id="card-score" class="valor"><span class="score-pill" style="background:#7b8794;">—</span></div>
         <div id="card-score-detalhe" class="detalhe">Classificação calculada pela EER, que resume a eficiência econômica da reposição.</div>
+      </div>
+    </section>
+
+    <section class="resumo-comparativo" aria-label="Comparativo de custo acumulado no melhor ciclo">
+      <h3>Custo acumulado no melhor ciclo — comparativo na categoria</h3>
+      <p>O gráfico compara o custo mensal estimado multiplicado pelo número de meses do melhor ciclo do veículo selecionado. Quanto menor o custo acumulado, melhor a posição econômica no período.</p>
+      <div id="grafico-custo-acumulado-categoria" class="grafico-resumo"></div>
+      <div class="chamada-rolagem-curta">
+        <span class="icone-seta">↓</span>
+        <span><strong>Role para ver os gráficos completos.</strong> Abaixo estão o custo mensal, o percentual da FIPE por mês, a EER e as comparações detalhadas com os demais veículos.</span>
       </div>
     </section>
 
@@ -637,7 +697,8 @@
       cardCustoReal: document.getElementById("card-custo-real"),
       cardCustoRealDetalhe: document.getElementById("card-custo-real-detalhe"),
       cardScore: document.getElementById("card-score"),
-      cardScoreDetalhe: document.getElementById("card-score-detalhe")
+      cardScoreDetalhe: document.getElementById("card-score-detalhe"),
+      graficoCustoAcumuladoCategoria: document.getElementById("grafico-custo-acumulado-categoria")
     };
 
     const plotConfig = {
@@ -769,6 +830,132 @@
       const idx = base.findIndex(d => d.veiculo === veiculo && (categoria === null || d.categoria === categoria));
       if (idx < 0) return { posicao: null, total: base.length };
       return { posicao: idx + 1, total: base.length };
+    }
+
+
+    function melhorRegistroVeiculo(dfVeic) {
+      const candidatos = [...dfVeic]
+        .filter(d => valorValido(d.periodo_meses) && (valorValido(d.eer_calculada) || valorValido(d.valor_mensal_total_esperado)));
+      if (candidatos.length === 0) return null;
+      const comEER = candidatos.filter(d => valorValido(d.eer_calculada));
+      if (comEER.length > 0) {
+        return comEER.sort((a, b) => Number(b.eer_calculada) - Number(a.eer_calculada))[0];
+      }
+      return candidatos
+        .filter(d => valorValido(d.valor_mensal_total_esperado))
+        .sort((a, b) => Number(a.valor_mensal_total_esperado) - Number(b.valor_mensal_total_esperado))[0] || null;
+    }
+
+    function plotCustoAcumuladoCategoria(dfVeic) {
+      const melhor = melhorRegistroVeiculo(dfVeic);
+      const divId = "grafico-custo-acumulado-categoria";
+      if (!melhor || !valorValido(melhor.periodo_meses)) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para calcular o custo acumulado.</div>';
+        return;
+      }
+
+      const periodo = Number(melhor.periodo_meses);
+      let base = dados
+        .filter(d =>
+          d.uf === ids.uf.value &&
+          d.categoria === ids.categoria.value &&
+          Number(d.periodo_meses) === periodo &&
+          valorValido(d.valor_mensal_total_esperado)
+        )
+        .map(d => ({
+          ...d,
+          custo_acumulado: Number(d.valor_mensal_total_esperado) * periodo
+        }))
+        .sort((a, b) => Number(a.custo_acumulado) - Number(b.custo_acumulado));
+
+      if (base.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados da categoria para o melhor ciclo encontrado.</div>';
+        return;
+      }
+
+      const selecionadoIndex = base.findIndex(d => d.veiculo === ids.veiculo.value);
+      const x = base.map(d => d.veiculo);
+      const y = base.map(d => Number(d.custo_acumulado));
+      const nomes = base.map(d => d.veiculo);
+      const cores = base.map(d => d.veiculo === ids.veiculo.value ? "#d71920" : "#9bb7d4");
+      const acumuladoSelecionado = selecionadoIndex >= 0 ? y[selecionadoIndex] : null;
+      const posicao = selecionadoIndex >= 0 ? selecionadoIndex + 1 : null;
+      const custom = base.map(d => [d.veiculo, numeroBR(Number(d.custo_acumulado), "moeda"), numeroBR(Number(d.valor_mensal_total_esperado), "moeda"), periodo]);
+
+      const trace = {
+        type: "bar",
+        x,
+        y,
+        text: nomes,
+        textposition: "inside",
+        textangle: -90,
+        insidetextanchor: "middle",
+        textfont: { color: "white", size: isMobile() ? 8 : 10 },
+        marker: {
+          color: cores,
+          line: {
+            width: base.map(d => d.veiculo === ids.veiculo.value ? 2.5 : 0),
+            color: base.map(d => d.veiculo === ids.veiculo.value ? "#8b0000" : "rgba(0,0,0,0)")
+          }
+        },
+        customdata: custom,
+        hovertemplate: "%{customdata[0]}<br>Custo acumulado: %{customdata[1]}<br>Custo mensal: %{customdata[2]}<br>Ciclo: %{customdata[3]} meses<extra></extra>"
+      };
+
+      const annotations = [];
+      if (selecionadoIndex >= 0) {
+        annotations.push({
+          x: x[selecionadoIndex],
+          y: y[selecionadoIndex],
+          text: `Seu veículo<br>${ordinalBR(posicao)} menor custo<br>${numeroBR(acumuladoSelecionado, "moeda")}`,
+          showarrow: true,
+          arrowhead: 2,
+          ax: 0,
+          ay: -70,
+          bgcolor: "#ffffff",
+          bordercolor: "#d71920",
+          borderwidth: 1,
+          borderpad: 6,
+          font: { color: "#d71920", size: isMobile() ? 10 : 12 }
+        });
+      }
+
+      const layout = {
+        title: {
+          text: isMobile()
+            ? `Custo acumulado<br>(${periodo} meses)`
+            : `Custo acumulado no melhor ciclo do veículo selecionado (${periodo} meses)`,
+          font: { size: isMobile() ? 13 : 16 },
+          x: 0.5,
+          xanchor: "center"
+        },
+        height: isMobile() ? 520 : 470,
+        margin: { l: isMobile() ? 70 : 85, r: isMobile() ? 20 : 35, t: 80, b: isMobile() ? 30 : 45 },
+        xaxis: {
+          title: "",
+          showticklabels: false,
+          fixedrange: true,
+          automargin: true
+        },
+        yaxis: {
+          title: "Custo acumulado (R$)",
+          tickprefix: "R$ ",
+          tickformat: ",.0f",
+          gridcolor: "#e4e7eb",
+          fixedrange: true,
+          rangemode: "tozero"
+        },
+        font: { family: "Arial, sans-serif", size: 12 },
+        paper_bgcolor: "white",
+        plot_bgcolor: "white",
+        dragmode: false,
+        showlegend: false,
+        annotations
+      };
+
+      Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
     function atualizarCardsDecisao(dfVeic) {
@@ -1074,6 +1261,7 @@
       );
 
       atualizarCardsDecisao(dfVeic);
+      plotCustoAcumuladoCategoria(dfVeic);
       atualizarNotasPeriodos(dfVeic, dfCatPeriodo);
 
       plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE zero-km requerido ao mês", "% da FIPE zero-km / mês", true);
