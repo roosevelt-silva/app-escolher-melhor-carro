@@ -299,6 +299,26 @@
       line-height: 1.35;
       margin-top: 8px;
     }
+
+    .decisao-chamada {
+      background: linear-gradient(135deg, #ffffff, #eef6ff);
+      border: 1px solid #d9e2ec;
+      border-left: 6px solid var(--verde);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin: 18px 0 10px;
+      color: #334e68;
+      line-height: 1.5;
+      box-shadow: 0 3px 10px rgba(11, 58, 102, 0.05);
+    }
+    .decisao-chamada strong { color: var(--azul); }
+    .decisao-chamada .seta-rolagem {
+      display: inline-block;
+      margin-top: 6px;
+      font-weight: 800;
+      color: var(--azul2);
+    }
+
     .score-pill {
       display: inline-flex;
       align-items: center;
@@ -309,96 +329,6 @@
       color: #fff;
       font-weight: 800;
       font-size: 0.98rem;
-    }
-
-
-    .sintese-decisao {
-      background: linear-gradient(135deg, #f8fafc, #eef6ff);
-      border: 1px solid #cfe0f2;
-      border-radius: 16px;
-      padding: 18px;
-      margin: 18px 0 24px;
-      box-shadow: 0 6px 18px rgba(11, 58, 102, 0.08);
-    }
-    .sintese-topo {
-      display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      align-items: flex-start;
-      margin-bottom: 14px;
-    }
-    .sintese-topo h2 {
-      border-bottom: 0;
-      padding-bottom: 0;
-      margin: 0 0 6px;
-      color: var(--azul);
-    }
-    .sintese-topo p {
-      margin: 0;
-      color: #52606d;
-      line-height: 1.45;
-      font-size: 0.92rem;
-    }
-    .sintese-periodo {
-      min-width: 150px;
-      text-align: center;
-      background: var(--azul);
-      color: white;
-      border-radius: 14px;
-      padding: 12px 14px;
-      box-shadow: 0 4px 12px rgba(11, 58, 102, 0.18);
-    }
-    .sintese-periodo .rotulo { font-size: 0.72rem; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.04em; }
-    .sintese-periodo .valor { font-size: 1.45rem; font-weight: 800; margin-top: 2px; }
-    .sintese-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 12px;
-    }
-    .sintese-card {
-      background: white;
-      border: 1px solid #d9e2ec;
-      border-radius: 14px;
-      padding: 14px;
-      min-height: 128px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .sintese-card .titulo {
-      color: #52606d;
-      font-size: 0.77rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.035em;
-      line-height: 1.25;
-    }
-    .sintese-card .valor {
-      color: var(--azul);
-      font-size: 1.35rem;
-      font-weight: 900;
-      margin: 10px 0 4px;
-      line-height: 1.05;
-    }
-    .sintese-card .detalhe {
-      color: #66788a;
-      font-size: 0.78rem;
-      line-height: 1.3;
-    }
-    .sintese-card.destaque {
-      border-left: 5px solid var(--verde);
-    }
-    .sintese-card.ranking { border-left: 5px solid var(--roxo); }
-    .sintese-card.custo { border-left: 5px solid var(--laranja); }
-    .sintese-card.relativo { border-left: 5px solid var(--azul2); }
-    @media (max-width: 1050px) {
-      .sintese-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-    @media (max-width: 800px) {
-      .sintese-topo { flex-direction: column; }
-      .sintese-periodo { width: 100%; }
-      .sintese-grid { grid-template-columns: 1fr; }
-      .sintese-card { min-height: auto; }
     }
 
     @media (max-width: 800px) {
@@ -471,11 +401,27 @@
       </div>
     </section>
 
+    <section class="decisao-chamada" aria-label="Chamada para os resultados da análise">
+      <strong>Síntese inicial da decisão econômica.</strong>
+      Antes dos gráficos, veja rapidamente o melhor ciclo estimado para o veículo e a posição dele no ranking da própria categoria e no ranking geral da base, considerando a UF selecionada. Abaixo, ao rolar a página, os gráficos detalham o custo mensal, o percentual da FIPE exigido por mês, a EER e a comparação com os demais veículos.
+      <br><span class="seta-rolagem">Role para ver os gráficos completos e entender o resultado.</span>
+    </section>
+
     <section class="decisao-grid" aria-label="Resumo da decisão econômica">
       <div class="decisao-card">
         <div class="rotulo">Momento ideal estimado</div>
         <div id="card-melhor-periodo" class="valor">—</div>
         <div id="card-melhor-periodo-detalhe" class="detalhe">Selecione um veículo para calcular o melhor ciclo.</div>
+      </div>
+      <div class="decisao-card">
+        <div class="rotulo">Ranking na categoria</div>
+        <div id="card-ranking-categoria" class="valor">—</div>
+        <div id="card-ranking-categoria-detalhe" class="detalhe">Posição do veículo entre os modelos da mesma categoria.</div>
+      </div>
+      <div class="decisao-card">
+        <div class="rotulo">Ranking geral</div>
+        <div id="card-ranking-geral" class="valor">—</div>
+        <div id="card-ranking-geral-detalhe" class="detalhe">Posição do veículo considerando todos os modelos da base na UF.</div>
       </div>
       <div class="decisao-card">
         <div class="rotulo">Custo real no melhor ciclo</div>
@@ -485,7 +431,7 @@
       <div class="decisao-card">
         <div class="rotulo">Eficiência de troca</div>
         <div id="card-score" class="valor"><span class="score-pill" style="background:#7b8794;">—</span></div>
-        <div id="card-score-detalhe" class="detalhe">Classificação calculada pela EER.</div>
+        <div id="card-score-detalhe" class="detalhe">Classificação calculada pela EER, que resume a eficiência econômica da reposição.</div>
       </div>
     </section>
 
@@ -684,6 +630,10 @@
       notaPeriodosGeral: document.getElementById("nota-periodos-geral"),
       cardMelhorPeriodo: document.getElementById("card-melhor-periodo"),
       cardMelhorPeriodoDetalhe: document.getElementById("card-melhor-periodo-detalhe"),
+      cardRankingCategoria: document.getElementById("card-ranking-categoria"),
+      cardRankingCategoriaDetalhe: document.getElementById("card-ranking-categoria-detalhe"),
+      cardRankingGeral: document.getElementById("card-ranking-geral"),
+      cardRankingGeralDetalhe: document.getElementById("card-ranking-geral-detalhe"),
       cardCustoReal: document.getElementById("card-custo-real"),
       cardCustoRealDetalhe: document.getElementById("card-custo-real-detalhe"),
       cardScore: document.getElementById("card-score"),
@@ -784,59 +734,6 @@
       if (ids.notaPeriodosCategoria) ids.notaPeriodosCategoria.style.display = temTodosPeriodos(dfCatPeriodo) ? "none" : "block";
     }
 
-
-
-    function posicaoRanking(listaOrdenada, criterio) {
-      const idx = listaOrdenada.findIndex(criterio);
-      return idx >= 0 ? idx + 1 : null;
-    }
-
-    function atualizarSintese(dfVeic, periodo) {
-      const linha = dfVeic.find(d => Number(d.periodo_meses) === Number(periodo));
-      if (ids.cardPeriodo) ids.cardPeriodo.textContent = `${periodo} meses`;
-
-      const melhor = [...dfVeic]
-        .filter(d => valorValido(d.eer_calculada))
-        .sort((a, b) => Number(b.eer_calculada) - Number(a.eer_calculada))[0];
-
-      if (melhor && ids.cardMelhorPeriodo) {
-        ids.cardMelhorPeriodo.textContent = `${Number(melhor.periodo_meses)} meses`;
-        ids.cardMelhorPeriodoDetalhe.textContent = `Maior EER do veículo: ${numeroBR(Number(melhor.eer_calculada), "percentual")}.`;
-      } else if (ids.cardMelhorPeriodo) {
-        ids.cardMelhorPeriodo.textContent = "—";
-        ids.cardMelhorPeriodoDetalhe.textContent = "Sem EER suficiente para estimar o melhor ciclo.";
-      }
-
-      if (!linha) {
-        if (ids.cardEER) ids.cardEER.textContent = "—";
-        if (ids.cardEERDetalhe) ids.cardEERDetalhe.textContent = "Sem dados para o ciclo selecionado.";
-        if (ids.cardCusto) ids.cardCusto.textContent = "—";
-        if (ids.cardFipe) ids.cardFipe.textContent = "—";
-        if (ids.cardRankingCategoria) ids.cardRankingCategoria.textContent = "—";
-        if (ids.cardRankingGeral) ids.cardRankingGeral.textContent = "—";
-        return;
-      }
-
-      if (ids.cardEER) ids.cardEER.textContent = valorValido(linha.eer_calculada) ? classeEER(linha.eer_calculada) : "—";
-      if (ids.cardEERDetalhe) ids.cardEERDetalhe.textContent = valorValido(linha.eer_calculada) ? `EER: ${numeroBR(Number(linha.eer_calculada), "percentual")}.` : "EER indisponível para este ciclo.";
-      if (ids.cardCusto) ids.cardCusto.textContent = valorValido(linha.valor_mensal_total_esperado) ? numeroBR(Number(linha.valor_mensal_total_esperado), "moeda") : "—";
-      if (ids.cardFipe) ids.cardFipe.textContent = valorValido(linha.perc_fipe_0km_requerido_mes) ? numeroBR(Number(linha.perc_fipe_0km_requerido_mes) * 100, "percentual") : "—";
-
-      const listaCategoria = dados
-        .filter(d => d.uf === ids.uf.value && d.categoria === ids.categoria.value && Number(d.periodo_meses) === Number(periodo) && valorValido(d.eer_calculada))
-        .sort((a, b) => Number(b.eer_calculada) - Number(a.eer_calculada));
-      const posCat = posicaoRanking(listaCategoria, d => d.veiculo === ids.veiculo.value && d.categoria === ids.categoria.value);
-      if (ids.cardRankingCategoria) ids.cardRankingCategoria.textContent = posCat ? `${posCat}º de ${listaCategoria.length}` : "—";
-      if (ids.cardRankingCategoriaDetalhe) ids.cardRankingCategoriaDetalhe.textContent = posCat ? `Entre veículos da categoria ${ids.categoria.value}, na UF ${ids.uf.value}.` : "Sem ranking disponível para a categoria neste ciclo.";
-
-      const listaGeral = dados
-        .filter(d => d.uf === ids.uf.value && Number(d.periodo_meses) === Number(periodo) && valorValido(d.eer_calculada))
-        .sort((a, b) => Number(b.eer_calculada) - Number(a.eer_calculada));
-      const posGeral = posicaoRanking(listaGeral, d => d.veiculo === ids.veiculo.value && d.categoria === ids.categoria.value);
-      if (ids.cardRankingGeral) ids.cardRankingGeral.textContent = posGeral ? `${posGeral}º de ${listaGeral.length}` : "—";
-      if (ids.cardRankingGeralDetalhe) ids.cardRankingGeralDetalhe.textContent = posGeral ? `Entre todos os veículos avaliados na UF ${ids.uf.value}.` : "Sem ranking geral disponível para este ciclo.";
-    }
-
     function corEER(valor) {
       const v = Number(valor);
       if (!Number.isFinite(v)) return "lightgray";
@@ -860,6 +757,20 @@
     }
 
 
+    function ordinalBR(posicao) {
+      if (!Number.isFinite(Number(posicao))) return "—";
+      return `${Number(posicao)}º`;
+    }
+
+    function calcularRanking(dfRanking, veiculo, categoria = null) {
+      let base = [...dfRanking].filter(d => valorValido(d.eer_calculada));
+      if (categoria !== null) base = base.filter(d => d.categoria === categoria);
+      base = base.sort((a, b) => Number(b.eer_calculada) - Number(a.eer_calculada));
+      const idx = base.findIndex(d => d.veiculo === veiculo && (categoria === null || d.categoria === categoria));
+      if (idx < 0) return { posicao: null, total: base.length };
+      return { posicao: idx + 1, total: base.length };
+    }
+
     function atualizarCardsDecisao(dfVeic) {
       const candidatos = [...dfVeic]
         .filter(d => valorValido(d.periodo_meses) && (valorValido(d.eer_calculada) || valorValido(d.valor_mensal_total_esperado)));
@@ -867,6 +778,10 @@
       if (candidatos.length === 0) {
         ids.cardMelhorPeriodo.textContent = "—";
         ids.cardMelhorPeriodoDetalhe.textContent = "Sem estimativas disponíveis para este veículo.";
+        ids.cardRankingCategoria.textContent = "—";
+        ids.cardRankingCategoriaDetalhe.textContent = "Sem EER para calcular a posição na categoria.";
+        ids.cardRankingGeral.textContent = "—";
+        ids.cardRankingGeralDetalhe.textContent = "Sem EER para calcular a posição geral.";
         ids.cardCustoReal.textContent = "—";
         ids.cardCustoRealDetalhe.textContent = "Escolha outro veículo ou UF para consultar.";
         ids.cardScore.innerHTML = '<span class="score-pill" style="background:#7b8794;">—</span>';
@@ -891,6 +806,27 @@
         ? `Melhor ciclo pela EER entre os períodos disponíveis.`
         : `Menor custo mensal entre os períodos disponíveis.`;
 
+      const dfRankingPeriodo = dados.filter(d =>
+        d.uf === ids.uf.value &&
+        Number(d.periodo_meses) === periodo
+      );
+      const rankingCategoria = calcularRanking(dfRankingPeriodo, ids.veiculo.value, ids.categoria.value);
+      const rankingGeral = calcularRanking(dfRankingPeriodo, ids.veiculo.value, null);
+
+      ids.cardRankingCategoria.textContent = rankingCategoria.posicao !== null
+        ? `${ordinalBR(rankingCategoria.posicao)} de ${rankingCategoria.total}`
+        : "—";
+      ids.cardRankingCategoriaDetalhe.textContent = rankingCategoria.posicao !== null
+        ? `Entre os veículos da categoria ${ids.categoria.value}, na UF ${ids.uf.value}, no ciclo de ${periodo} meses.`
+        : `Sem EER disponível para posicionar este veículo na categoria.`;
+
+      ids.cardRankingGeral.textContent = rankingGeral.posicao !== null
+        ? `${ordinalBR(rankingGeral.posicao)} de ${rankingGeral.total}`
+        : "—";
+      ids.cardRankingGeralDetalhe.textContent = rankingGeral.posicao !== null
+        ? `Entre todos os veículos analisados na UF ${ids.uf.value}, no ciclo de ${periodo} meses.`
+        : `Sem EER disponível para posicionar este veículo no ranking geral.`;
+
       ids.cardCustoReal.textContent = custo !== null ? numeroBR(custo, "moeda") : "Sem custo";
       ids.cardCustoRealDetalhe.textContent = perc !== null
         ? `Equivale a ${numeroBR(perc, "percentual")} da FIPE zero-km por mês.`
@@ -898,7 +834,7 @@
 
       ids.cardScore.innerHTML = `<span class="score-pill" style="background:${cor};">${classe}</span>`;
       ids.cardScoreDetalhe.textContent = eer !== null
-        ? `EER de ${numeroBR(eer, "percentual")} no ciclo de ${periodo} meses.`
+        ? `EER de ${numeroBR(eer, "percentual")} no ciclo de ${periodo} meses. A EER resume a eficiência econômica da reposição.`
         : `EER indisponível para o melhor ciclo encontrado.`;
     }
 
@@ -1139,7 +1075,6 @@
 
       atualizarCardsDecisao(dfVeic);
       atualizarNotasPeriodos(dfVeic, dfCatPeriodo);
-      atualizarSintese(dfVeic, periodo);
 
       plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE zero-km requerido ao mês", "% da FIPE zero-km / mês", true);
       plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo real mensal estimado", "R$ por mês", false);
