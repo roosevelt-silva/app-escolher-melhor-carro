@@ -1237,9 +1237,16 @@
         hovertemplate: "%{customdata[0]}<br>Custo acumulado: %{customdata[1]}<br>Custo mensal: %{customdata[2]}<br>Período: %{customdata[3]} meses<extra></extra>"
       };
 
+      const posicaoSelecionado = base.findIndex(d => d.veiculo === ids.veiculo.value) + 1;
+      const totalRanking = base.length;
+      const rankingSelecionado = posicaoSelecionado > 0 ? `${ordinalBR(posicaoSelecionado)} de ${totalRanking}` : "";
+      const prefixoRankingSelecionado = posicaoSelecionado > 0
+        ? `${posicaoSelecionado <= 3 ? (posicaoSelecionado === 1 ? "🏆 " : posicaoSelecionado === 2 ? "🥈 " : "🥉 ") : ""}${rankingSelecionado}`
+        : "";
+
       const tickText = base.map(d => {
         if (d.veiculo === ids.veiculo.value) {
-          return `<span style="color:#d71920;font-weight:700;">${d.veiculo}</span>`;
+          return `<span style="color:#d71920;font-weight:700;">${d.veiculo} <span style="color:#0f9d58;font-weight:900;">${prefixoRankingSelecionado}</span></span>`;
         }
         return d.veiculo;
       });
