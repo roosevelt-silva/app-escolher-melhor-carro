@@ -492,7 +492,7 @@
 
     <section>
       <h2>1. Melhor ciclo de troca para o veículo selecionado</h2>
-      <p class="explica">Os três gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A leitura principal é simples: quanto menor o custo mensal e maior a EER, mais eficiente tende a ser aquele ciclo de troca.</p>
+      <p class="explica">Os gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A leitura principal é simples: quanto menor o custo mensal, menor o peso da depreciação e maior a EER, mais eficiente tende a ser aquele ciclo de troca.</p>
 
       <h3>Custo real mensal estimado</h3>
       <p class="explica">Mostra quanto o veículo tende a custar por mês quando todos os componentes relevantes são diluídos no tempo: perda de valor, tributos, seguro, uso, manutenção e a provisão necessária para trocar por um zero-quilômetro equivalente.</p>
@@ -505,6 +505,10 @@
       <h3>Depreciação estimada pela Tabela FIPE</h3>
       <p class="explica">Mostra a perda estimada de valor do veículo em relação ao preço FIPE zero-quilômetro, considerando cada ciclo de troca. Quanto menor a depreciação acumulada, menor tende a ser a perda patrimonial no período.</p>
       <div id="grafico-depreciacao-periodos" class="grafico"></div>
+
+      <h3>Participação da depreciação no custo mensal</h3>
+      <p class="explica">Mostra quanto da estimativa de custo mensal total é explicado pela perda de valor do veículo. Valores mais altos indicam que a depreciação é o principal componente do custo de uso e reposição naquele ciclo.</p>
+      <div id="grafico-participacao-depreciacao-periodos" class="grafico"></div>
 
       <h3>Índice de Eficiência Econômica de Reposição - EER</h3>
       <p class="explica">A EER resume a qualidade econômica da decisão. Valores maiores indicam melhor equilíbrio entre custo mensal, custo proporcional e reposição do veículo. As cores definem a qualidade da decisão.</p>
@@ -850,6 +854,62 @@
       return candidatas
         .map(k => ({ k, v: Number(obj[k]) }))
         .sort((a, b) => a.v - b.v)[0].k;
+    }
+
+    function obterValoresFIPEDepreciacao(d) {
+      const fipe0kmDireto = primeiroValorNumerico(d, [
+        "fipe_0km", "fipe_0_km", "valor_fipe_0km", "valor_fipe_0_km",
+        "valor_0km", "valor_0_km", "preco_0km", "preco_0_km",
+        "preco_fipe_0km", "fipe_zero_km", "valor_zero_km",
+        "fipe_atual_0km", "fipe_2026", "valor_fipe_2026"
+      ]);
+
+      const fipeSeminovoDireto = primeiroValorNumerico(d, [
+        "fipe_periodo", "valor_fipe_periodo", "valor_fipe_usado",
+        "fipe_usado", "valor_usado", "valor_seminovo",
+        "fipe_seminovo", "valor_fipe_seminovo", "valor_fipe_ciclo", "fipe_ciclo"
+      ]);
+
+      let fipe0km = fipe0kmDireto;
+      let fipeSeminovo = fipeSeminovoDireto;
+
+      const chavesFipe = chavesNumericasFIPE(d);
+      if (fipe0km === null || fipeSeminovo === null) {
+        const colZero = escolherColunaFIPEZero(d, chavesFipe);
+        const colSeminovo = escolherColunaFIPESeminovo(d, chavesFipe, d.periodo_meses, colZero);
+        if (fipe0km === null && colZero) fipe0km = Number(d[colZero]);
+        if (fipeSeminovo === null && colSeminovo) fipeSeminovo = Number(d[colSeminovo]);
+      }
+
+      if (fipe0km !== null && fipeSeminovo !== null && fipe0km > 0 && Number.isFinite(fipe0km) && Number.isFinite(fipeSeminovo)) {
+        return { fipe0km, fipeSeminovo, valorDepreciacao: Math.max(0, fipe0km - fipeSeminovo) };
+      }
+      return { fipe0km: null, fipeSeminovo: null, valorDepreciacao: null };
+    }
+
+    function calcularDepreciacaoMensalRegistro(d) {
+      const periodo = Number(d.periodo_meses);
+      if (!Number.isFinite(periodo) || periodo <= 0) return null;
+
+      const depMensalDireta = primeiroValorNumerico(d, [
+        "depreciacao_mensal", "valor_depreciacao_mensal", "custo_depreciacao_mensal",
+        "depreciacao_mes", "valor_mensal_depreciacao", "perda_mensal_fipe"
+      ]);
+      if (depMensalDireta !== null) return depMensalDireta;
+
+      const depValorDireta = primeiroValorNumerico(d, [
+        "valor_depreciacao", "depreciacao_valor", "depreciacao_acumulada_valor",
+        "perda_valor_fipe", "perda_fipe", "depreciacao_fipe_valor"
+      ]);
+      if (depValorDireta !== null) return depValorDireta / periodo;
+
+      const valores = obterValoresFIPEDepreciacao(d);
+      if (valores.valorDepreciacao !== null) return valores.valorDepreciacao / periodo;
+
+      const depPerc = calcularDepreciacaoRegistro(d);
+      if (depPerc !== null && valores.fipe0km !== null) return (valores.fipe0km * depPerc / 100) / periodo;
+
+      return null;
     }
 
     function calcularDepreciacaoRegistro(d) {
@@ -1267,6 +1327,53 @@
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
+    function plotParticipacaoDepreciacaoPeriodos(divId, df) {
+      const ordenado = [...df]
+        .map(d => {
+          const depMensal = calcularDepreciacaoMensalRegistro(d);
+          const custoMensal = valorValido(d.valor_mensal_total_esperado) ? Number(d.valor_mensal_total_esperado) : null;
+          const participacao = depMensal !== null && custoMensal !== null && custoMensal > 0
+            ? (depMensal / custoMensal) * 100
+            : null;
+          return { ...d, depreciacao_mensal_calculada: depMensal, participacao_depreciacao_custo: participacao };
+        })
+        .filter(d => valorValido(d.periodo_meses) && valorValido(d.participacao_depreciacao_custo))
+        .sort((a, b) => Number(a.periodo_meses) - Number(b.periodo_meses));
+
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;line-height:1.45;">Sem dados disponíveis para calcular a participação da depreciação no custo mensal. É necessário ter depreciação estimada e custo mensal total para o mesmo ciclo.</div>';
+        return;
+      }
+
+      const x = ordenado.map(d => Number(d.periodo_meses));
+      const y = ordenado.map(d => Number(d.participacao_depreciacao_custo));
+      const labels = y.map(v => numeroBR(v, "percentual"));
+      const custom = ordenado.map(d => [
+        numeroBR(Number(d.depreciacao_mensal_calculada), "moeda"),
+        numeroBR(Number(d.valor_mensal_total_esperado), "moeda")
+      ]);
+      const maxY = Math.max(...y);
+
+      const trace = {
+        type: "bar",
+        x,
+        y,
+        text: labels,
+        textposition: "outside",
+        marker: { color: "#8e44ad" },
+        cliponaxis: false,
+        customdata: custom,
+        hovertemplate: "Período: %{x} meses<br>Participação: %{text}<br>Depreciação mensal: %{customdata[0]}<br>Custo mensal total: %{customdata[1]}<extra></extra>"
+      };
+
+      const layout = layoutBase("Participação da depreciação no custo mensal", "Período de troca (meses)", "Depreciação / custo mensal (%)", 420);
+      layout.xaxis.tickmode = "array";
+      layout.xaxis.tickvals = [12, 24, 36, 48, 60];
+      layout.yaxis.range = [0, Math.min(100, maxY * 1.22)];
+      Plotly.newPlot(divId, [trace], layout, plotConfig);
+    }
+
     function plotCategoria(divId, df, coluna, titulo, eixoX, percentual = false, maiorMelhor = false) {
       let ordenado = [...df].filter(d => valorValido(d[coluna]));
       ordenado = ordenado.sort((a, b) => Number(a[coluna]) - Number(b[coluna]));
@@ -1449,6 +1556,7 @@
       plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE zero-km requerido ao mês", "% da FIPE zero-km / mês", true);
       plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo real mensal estimado", "R$ por mês", false);
       plotDepreciacaoPeriodos("grafico-depreciacao-periodos", dfVeic);
+      plotParticipacaoDepreciacaoPeriodos("grafico-participacao-depreciacao-periodos", dfVeic);
       plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Índice de Eficiência Econômica de Reposição - EER", "EER (%)", false);
 
       const existePeriodo = dfVeic.some(d =>
