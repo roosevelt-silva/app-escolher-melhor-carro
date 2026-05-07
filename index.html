@@ -261,6 +261,46 @@
       vertical-align: middle;
     }
 
+
+
+    .chamada-detalhes-analise {
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 16px;
+      align-items: center;
+      background: linear-gradient(135deg, #fff7cc, #eef6ff 55%, #ffffff);
+      border: 1px solid #d9e2ec;
+      border-left: 7px solid var(--laranja);
+      border-radius: 18px;
+      padding: 18px 20px;
+      margin: 6px 0 28px;
+      box-shadow: 0 4px 14px rgba(11, 58, 102, 0.08);
+      color: #334e68;
+    }
+    .chamada-detalhes-analise .chamada-icone {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--azul);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      box-shadow: 0 3px 10px rgba(11, 58, 102, 0.18);
+    }
+    .chamada-detalhes-analise strong {
+      display: block;
+      color: var(--azul);
+      font-size: 1.12rem;
+      margin-bottom: 5px;
+    }
+    .chamada-detalhes-analise p {
+      margin: 0;
+      font-size: 0.96rem;
+      line-height: 1.45;
+    }
+
     .hero-badges {
       display: flex;
       flex-wrap: wrap;
@@ -435,6 +475,15 @@
       .metodologia-grid { grid-template-columns: 1fr; }
       .painel-titulo { flex-direction: column; }
       .hero-badges span { font-size: 0.78rem; }
+
+      .chamada-detalhes-analise {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .chamada-detalhes-analise .chamada-icone {
+        margin: 0 auto;
+      }
+
     }
   </style>
 </head>
@@ -563,6 +612,14 @@
           <div id="card-estado-mais-barato" class="valor">—</div>
           <div id="card-estado-mais-barato-detalhe" class="detalhe">UF com menor custo mensal para este veículo no ciclo de 24 meses.</div>
         </div>
+      </div>
+    </section>
+
+    <section class="chamada-detalhes-analise" aria-label="Chamada para análise detalhada">
+      <div class="chamada-icone" aria-hidden="true">🔎</div>
+      <div>
+        <strong>Quer entender melhor os números?</strong>
+        <p>O resumo acima já entrega a decisão principal. Se você quiser ver a análise do seu jeito, explore as seções seguintes: ciclo de troca, depreciação, comparação com a categoria, diferença entre estados e ranking geral.</p>
       </div>
     </section>
 
@@ -1554,7 +1611,7 @@
         text: selecionado.map(v => v ? rankingSelecionado : ""),
         textposition: "inside",
         insidetextanchor: "middle",
-        textfont: { color: "white", size: isMobile() ? 10 : 12, family: "Arial, sans-serif" },
+        textfont: { color: "white", size: isMobile() ? 18 : 24, family: "Arial, sans-serif", weight: 900 },
         marker: { color: "rgba(0,0,0,0)" },
         hoverinfo: "skip",
         showlegend: false,
@@ -1632,7 +1689,7 @@
         text: selecionado.map(v => v ? rankingSelecionado : ""),
         textposition: "inside",
         insidetextanchor: "middle",
-        textfont: { color: "white", size: isMobile() ? 10 : 12, family: "Arial, sans-serif" },
+        textfont: { color: "white", size: isMobile() ? 18 : 24, family: "Arial, sans-serif", weight: 900 },
         marker: { color: "rgba(0,0,0,0)" },
         hoverinfo: "skip",
         showlegend: false,
