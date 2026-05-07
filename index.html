@@ -502,6 +502,10 @@
       <p class="explica">Indica qual parcela mensal do valor FIPE do veículo zero-quilômetro é consumida para sustentar o uso e viabilizar a reposição. Quanto menor esse percentual, menor tende a ser o esforço financeiro proporcional.</p>
       <div id="grafico-fipe-periodos" class="grafico"></div>
 
+      <h3>Depreciação estimada pela Tabela FIPE</h3>
+      <p class="explica">Mostra a perda estimada de valor do veículo em relação ao preço FIPE zero-quilômetro, considerando cada ciclo de troca. Quanto menor a depreciação acumulada, menor tende a ser a perda patrimonial no período.</p>
+      <div id="grafico-depreciacao-periodos" class="grafico"></div>
+
       <h3>Índice de Eficiência Econômica de Reposição - EER</h3>
       <p class="explica">A EER resume a qualidade econômica da decisão. Valores maiores indicam melhor equilíbrio entre custo mensal, custo proporcional e reposição do veículo. As cores definem a qualidade da decisão.</p>
       <div id="grafico-eer-periodos" class="grafico"></div>
@@ -778,6 +782,56 @@
 
     function valorValido(v) {
       return v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v));
+    }
+
+    function primeiroValorNumerico(obj, nomesPossiveis) {
+      for (const nome of nomesPossiveis) {
+        if (Object.prototype.hasOwnProperty.call(obj, nome) && valorValido(obj[nome])) {
+          return Number(obj[nome]);
+        }
+      }
+      return null;
+    }
+
+    function calcularDepreciacaoRegistro(d) {
+      const percDireto = primeiroValorNumerico(d, [
+        "depreciacao_percentual",
+        "perc_depreciacao",
+        "depreciacao_perc",
+        "depreciacao_acumulada_percentual",
+        "depreciacao_fipe_percentual"
+      ]);
+      if (percDireto !== null) {
+        return percDireto <= 1 ? percDireto * 100 : percDireto;
+      }
+
+      const fipe0km = primeiroValorNumerico(d, [
+        "fipe_0km",
+        "valor_fipe_0km",
+        "valor_0km",
+        "preco_0km",
+        "preco_fipe_0km",
+        "fipe_zero_km",
+        "valor_zero_km",
+        "fipe_atual_0km"
+      ]);
+      const fipeSeminovo = primeiroValorNumerico(d, [
+        "fipe_periodo",
+        "valor_fipe_periodo",
+        "valor_fipe_usado",
+        "fipe_usado",
+        "valor_seminovo",
+        "fipe_seminovo",
+        "valor_fipe_seminovo",
+        "valor_fipe_ciclo",
+        "fipe_ciclo"
+      ]);
+
+      if (fipe0km !== null && fipeSeminovo !== null && fipe0km > 0) {
+        return ((fipe0km - fipeSeminovo) / fipe0km) * 100;
+      }
+
+      return null;
     }
 
     function temTodosPeriodos(df, periodosEsperados = [12, 24, 36, 48, 60]) {
@@ -1097,6 +1151,41 @@
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
+    function plotDepreciacaoPeriodos(divId, df) {
+      const ordenado = [...df]
+        .map(d => ({ ...d, depreciacao_calculada: calcularDepreciacaoRegistro(d) }))
+        .filter(d => valorValido(d.periodo_meses) && valorValido(d.depreciacao_calculada))
+        .sort((a, b) => Number(a.periodo_meses) - Number(b.periodo_meses));
+
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;line-height:1.45;">Sem dados disponíveis para calcular a depreciação. Confira se o CSV possui uma coluna de depreciação percentual ou as colunas de FIPE zero-km e FIPE do seminovo no ciclo.</div>';
+        return;
+      }
+
+      const x = ordenado.map(d => Number(d.periodo_meses));
+      const y = ordenado.map(d => Number(d.depreciacao_calculada));
+      const labels = y.map(v => numeroBR(v, "percentual"));
+      const maxY = Math.max(...y);
+
+      const trace = {
+        type: "bar",
+        x,
+        y,
+        text: labels,
+        textposition: "outside",
+        marker: { color: "#f28e2b" },
+        cliponaxis: false,
+        hovertemplate: "Período: %{x} meses<br>Depreciação estimada: %{text}<extra></extra>"
+      };
+
+      const layout = layoutBase("Depreciação estimada pela FIPE", "Período de troca (meses)", "Depreciação acumulada (%)", 420);
+      layout.xaxis.tickmode = "array";
+      layout.xaxis.tickvals = [12, 24, 36, 48, 60];
+      layout.yaxis.range = [0, maxY * 1.22];
+      Plotly.newPlot(divId, [trace], layout, plotConfig);
+    }
+
     function plotCategoria(divId, df, coluna, titulo, eixoX, percentual = false, maiorMelhor = false) {
       let ordenado = [...df].filter(d => valorValido(d[coluna]));
       ordenado = ordenado.sort((a, b) => Number(a[coluna]) - Number(b[coluna]));
@@ -1278,6 +1367,7 @@
 
       plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE zero-km requerido ao mês", "% da FIPE zero-km / mês", true);
       plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo real mensal estimado", "R$ por mês", false);
+      plotDepreciacaoPeriodos("grafico-depreciacao-periodos", dfVeic);
       plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Índice de Eficiência Econômica de Reposição - EER", "EER (%)", false);
 
       const existePeriodo = dfVeic.some(d =>
