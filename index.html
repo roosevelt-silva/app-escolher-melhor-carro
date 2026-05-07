@@ -492,7 +492,7 @@
 
     <section>
       <h2>1. Melhor ciclo de troca para o veículo selecionado</h2>
-      <p class="explica">Os três gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A leitura principal é simples: quanto menor o custo mensal e maior a EER, mais eficiente tende a ser aquele ciclo de troca.</p>
+      <p class="explica">Os gráficos abaixo mostram apenas o veículo escolhido, comparando os ciclos de 12, 24, 36, 48 e 60 meses. A leitura principal é simples: quanto menor o custo mensal, menor o peso da depreciação e maior a EER, mais eficiente tende a ser aquele ciclo de troca.</p>
 
       <h3>Custo real mensal estimado</h3>
       <p class="explica">Mostra quanto o veículo tende a custar por mês quando todos os componentes relevantes são diluídos no tempo: perda de valor, tributos, seguro, uso, manutenção e a provisão necessária para trocar por um zero-quilômetro equivalente.</p>
@@ -501,6 +501,14 @@
       <h3>Percentual do valor do carro exigido por mês</h3>
       <p class="explica">Indica qual parcela mensal do valor FIPE do veículo zero-quilômetro é consumida para sustentar o uso e viabilizar a reposição. Quanto menor esse percentual, menor tende a ser o esforço financeiro proporcional.</p>
       <div id="grafico-fipe-periodos" class="grafico"></div>
+
+      <h3>Depreciação estimada pela Tabela FIPE</h3>
+      <p class="explica">Mostra a perda estimada de valor do veículo em relação ao preço FIPE zero-quilômetro, considerando cada ciclo de troca. Quanto menor a depreciação acumulada, menor tende a ser a perda patrimonial no período.</p>
+      <div id="grafico-depreciacao-periodos" class="grafico"></div>
+
+      <h3>Participação da depreciação no custo mensal</h3>
+      <p class="explica">Mostra quanto da estimativa de custo mensal total é explicado pela perda de valor do veículo. Valores mais altos indicam que a depreciação é o principal componente do custo de uso e reposição naquele ciclo.</p>
+      <div id="grafico-participacao-depreciacao-periodos" class="grafico"></div>
 
       <h3>Índice de Eficiência Econômica de Reposição - EER</h3>
       <p class="explica">A EER resume a qualidade econômica da decisão. Valores maiores indicam melhor equilíbrio entre custo mensal, custo proporcional e reposição do veículo. As cores definem a qualidade da decisão.</p>
@@ -780,6 +788,192 @@
       return v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v));
     }
 
+    function normalizarChave(nome) {
+      return String(nome || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+    }
+
+    function primeiroValorNumerico(obj, nomesPossiveis) {
+      for (const nome of nomesPossiveis) {
+        if (Object.prototype.hasOwnProperty.call(obj, nome) && valorValido(obj[nome])) {
+          return Number(obj[nome]);
+        }
+      }
+      return null;
+    }
+
+    function chavesNumericasFIPE(obj) {
+      const proibidos = ["perc", "percent", "requerido", "mes", "eer", "custo", "ipva", "seguro", "combust", "manut", "pneu", "uf", "categoria", "veiculo", "marca", "periodo"];
+      return Object.keys(obj || {}).filter(k => {
+        const nk = normalizarChave(k);
+        if (!nk.includes("fipe")) return false;
+        if (proibidos.some(p => nk.includes(p))) return false;
+        return valorValido(obj[k]) && Number(obj[k]) > 1000;
+      });
+    }
+
+    function escolherColunaFIPEZero(obj, chaves) {
+      const preferidas = ["0km", "0_km", "zero", "novo", "nova", "2026", "atual"];
+      for (const termo of preferidas) {
+        const achada = chaves.find(k => normalizarChave(k).includes(termo));
+        if (achada) return achada;
+      }
+      if (chaves.length === 0) return null;
+      return chaves
+        .map(k => ({ k, v: Number(obj[k]) }))
+        .sort((a, b) => b.v - a.v)[0].k;
+    }
+
+    function escolherColunaFIPESeminovo(obj, chaves, periodoMeses, colunaZero) {
+      const p = Number(periodoMeses);
+      const anosUso = Number.isFinite(p) ? Math.round(p / 12) : null;
+      const anoReferenciaZero = 2026;
+      const anoSeminovo = anosUso !== null ? anoReferenciaZero - anosUso : null;
+
+      const padroes = [];
+      if (anoSeminovo !== null) padroes.push(String(anoSeminovo));
+      if (Number.isFinite(p)) {
+        padroes.push(`${p}m`, `${p}_m`, `${p}-m`, `${p}mes`, `${p}_mes`, `${p}_meses`, `${p} meses`);
+      }
+      if (anosUso !== null) {
+        padroes.push(`${anosUso}ano`, `${anosUso}_ano`, `${anosUso} anos`, `${anosUso}_anos`);
+      }
+      padroes.push("usado", "seminovo", "ciclo", "periodo");
+
+      const candidatas = chaves.filter(k => k !== colunaZero);
+      for (const termo of padroes) {
+        const achada = candidatas.find(k => normalizarChave(k).includes(normalizarChave(termo)));
+        if (achada) return achada;
+      }
+      if (candidatas.length === 0) return null;
+
+      // Último recurso: para cada linha/período, usa a maior FIPE como zero-km e a menor FIPE como valor usado.
+      // Isso evita gráfico vazio quando o CSV traz apenas colunas anuais sem nomes padronizados.
+      return candidatas
+        .map(k => ({ k, v: Number(obj[k]) }))
+        .sort((a, b) => a.v - b.v)[0].k;
+    }
+
+    function obterValoresFIPEDepreciacao(d) {
+      const fipe0kmDireto = primeiroValorNumerico(d, [
+        "fipe_0km", "fipe_0_km", "valor_fipe_0km", "valor_fipe_0_km",
+        "valor_0km", "valor_0_km", "preco_0km", "preco_0_km",
+        "preco_fipe_0km", "fipe_zero_km", "valor_zero_km",
+        "fipe_atual_0km", "fipe_2026", "valor_fipe_2026"
+      ]);
+
+      const fipeSeminovoDireto = primeiroValorNumerico(d, [
+        "fipe_periodo", "valor_fipe_periodo", "valor_fipe_usado",
+        "fipe_usado", "valor_usado", "valor_seminovo",
+        "fipe_seminovo", "valor_fipe_seminovo", "valor_fipe_ciclo", "fipe_ciclo"
+      ]);
+
+      let fipe0km = fipe0kmDireto;
+      let fipeSeminovo = fipeSeminovoDireto;
+
+      const chavesFipe = chavesNumericasFIPE(d);
+      if (fipe0km === null || fipeSeminovo === null) {
+        const colZero = escolherColunaFIPEZero(d, chavesFipe);
+        const colSeminovo = escolherColunaFIPESeminovo(d, chavesFipe, d.periodo_meses, colZero);
+        if (fipe0km === null && colZero) fipe0km = Number(d[colZero]);
+        if (fipeSeminovo === null && colSeminovo) fipeSeminovo = Number(d[colSeminovo]);
+      }
+
+      if (fipe0km !== null && fipeSeminovo !== null && fipe0km > 0 && Number.isFinite(fipe0km) && Number.isFinite(fipeSeminovo)) {
+        return { fipe0km, fipeSeminovo, valorDepreciacao: Math.max(0, fipe0km - fipeSeminovo) };
+      }
+      return { fipe0km: null, fipeSeminovo: null, valorDepreciacao: null };
+    }
+
+    function calcularDepreciacaoMensalRegistro(d) {
+      const periodo = Number(d.periodo_meses);
+      if (!Number.isFinite(periodo) || periodo <= 0) return null;
+
+      const depMensalDireta = primeiroValorNumerico(d, [
+        "depreciacao_mensal", "valor_depreciacao_mensal", "custo_depreciacao_mensal",
+        "depreciacao_mes", "valor_mensal_depreciacao", "perda_mensal_fipe"
+      ]);
+      if (depMensalDireta !== null) return depMensalDireta;
+
+      const depValorDireta = primeiroValorNumerico(d, [
+        "valor_depreciacao", "depreciacao_valor", "depreciacao_acumulada_valor",
+        "perda_valor_fipe", "perda_fipe", "depreciacao_fipe_valor"
+      ]);
+      if (depValorDireta !== null) return depValorDireta / periodo;
+
+      const valores = obterValoresFIPEDepreciacao(d);
+      if (valores.valorDepreciacao !== null) return valores.valorDepreciacao / periodo;
+
+      const depPerc = calcularDepreciacaoRegistro(d);
+      if (depPerc !== null && valores.fipe0km !== null) return (valores.fipe0km * depPerc / 100) / periodo;
+
+      return null;
+    }
+
+    function calcularDepreciacaoRegistro(d) {
+      const percDireto = primeiroValorNumerico(d, [
+        "depreciacao_percentual",
+        "perc_depreciacao",
+        "depreciacao_perc",
+        "depreciacao_acumulada_percentual",
+        "depreciacao_fipe_percentual",
+        "depreciacao_acumulada",
+        "depreciacao"
+      ]);
+      if (percDireto !== null) {
+        return percDireto <= 1 ? percDireto * 100 : percDireto;
+      }
+
+      const fipe0kmDireto = primeiroValorNumerico(d, [
+        "fipe_0km",
+        "fipe_0_km",
+        "valor_fipe_0km",
+        "valor_fipe_0_km",
+        "valor_0km",
+        "valor_0_km",
+        "preco_0km",
+        "preco_0_km",
+        "preco_fipe_0km",
+        "fipe_zero_km",
+        "valor_zero_km",
+        "fipe_atual_0km",
+        "fipe_2026",
+        "valor_fipe_2026"
+      ]);
+      const fipeSeminovoDireto = primeiroValorNumerico(d, [
+        "fipe_periodo",
+        "valor_fipe_periodo",
+        "valor_fipe_usado",
+        "fipe_usado",
+        "valor_usado",
+        "valor_seminovo",
+        "fipe_seminovo",
+        "valor_fipe_seminovo",
+        "valor_fipe_ciclo",
+        "fipe_ciclo"
+      ]);
+
+      let fipe0km = fipe0kmDireto;
+      let fipeSeminovo = fipeSeminovoDireto;
+
+      const chavesFipe = chavesNumericasFIPE(d);
+      if (fipe0km === null || fipeSeminovo === null) {
+        const colZero = escolherColunaFIPEZero(d, chavesFipe);
+        const colSeminovo = escolherColunaFIPESeminovo(d, chavesFipe, d.periodo_meses, colZero);
+        if (fipe0km === null && colZero) fipe0km = Number(d[colZero]);
+        if (fipeSeminovo === null && colSeminovo) fipeSeminovo = Number(d[colSeminovo]);
+      }
+
+      if (fipe0km !== null && fipeSeminovo !== null && fipe0km > 0) {
+        const dep = ((fipe0km - fipeSeminovo) / fipe0km) * 100;
+        if (Number.isFinite(dep) && dep >= -30 && dep <= 95) return Math.max(0, dep);
+      }
+
+      return null;
+    }
+
     function temTodosPeriodos(df, periodosEsperados = [12, 24, 36, 48, 60]) {
       const periodosDisponiveis = [...new Set(
         df
@@ -967,23 +1161,6 @@
        // ]
       };
 
-      const idxSelecionado = base.findIndex(d => d.veiculo === ids.veiculo.value);
-      if (idxSelecionado >= 0) {
-        layout.annotations = [
-          {
-            x: x[idxSelecionado] * 0.5,
-            y: y[idxSelecionado],
-            text: `${idxSelecionado + 1}º/${base.length}`,
-            showarrow: false,
-            font: { color: "white", size: isMobile() ? 10 : 12, family: "Arial, sans-serif" },
-            bgcolor: "rgba(0,0,0,0.28)",
-            bordercolor: "rgba(255,255,255,0.55)",
-            borderwidth: 1,
-            borderpad: 3
-          }
-        ];
-      }
-
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
@@ -1114,6 +1291,89 @@
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
+    function plotDepreciacaoPeriodos(divId, df) {
+      const ordenado = [...df]
+        .map(d => ({ ...d, depreciacao_calculada: calcularDepreciacaoRegistro(d) }))
+        .filter(d => valorValido(d.periodo_meses) && valorValido(d.depreciacao_calculada))
+        .sort((a, b) => Number(a.periodo_meses) - Number(b.periodo_meses));
+
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        const chavesDetectadas = df.length ? chavesNumericasFIPE(df[0]).join(', ') : '';
+        document.getElementById(divId).innerHTML = `<div style="padding:16px;color:#52606d;font-weight:700;line-height:1.45;">Sem dados disponíveis para calcular a depreciação. Colunas FIPE numéricas detectadas nesta seleção: ${chavesDetectadas || 'nenhuma'}.</div>`;
+        return;
+      }
+
+      const x = ordenado.map(d => Number(d.periodo_meses));
+      const y = ordenado.map(d => Number(d.depreciacao_calculada));
+      const labels = y.map(v => numeroBR(v, "percentual"));
+      const maxY = Math.max(...y);
+
+      const trace = {
+        type: "bar",
+        x,
+        y,
+        text: labels,
+        textposition: "outside",
+        marker: { color: "#f28e2b" },
+        cliponaxis: false,
+        hovertemplate: "Período: %{x} meses<br>Depreciação estimada: %{text}<extra></extra>"
+      };
+
+      const layout = layoutBase("Depreciação estimada pela FIPE", "Período de troca (meses)", "Depreciação acumulada (%)", 420);
+      layout.xaxis.tickmode = "array";
+      layout.xaxis.tickvals = [12, 24, 36, 48, 60];
+      layout.yaxis.range = [0, maxY * 1.22];
+      Plotly.newPlot(divId, [trace], layout, plotConfig);
+    }
+
+    function plotParticipacaoDepreciacaoPeriodos(divId, df) {
+      const ordenado = [...df]
+        .map(d => {
+          const depMensal = calcularDepreciacaoMensalRegistro(d);
+          const custoMensal = valorValido(d.valor_mensal_total_esperado) ? Number(d.valor_mensal_total_esperado) : null;
+          const participacao = depMensal !== null && custoMensal !== null && custoMensal > 0
+            ? (depMensal / custoMensal) * 100
+            : null;
+          return { ...d, depreciacao_mensal_calculada: depMensal, participacao_depreciacao_custo: participacao };
+        })
+        .filter(d => valorValido(d.periodo_meses) && valorValido(d.participacao_depreciacao_custo))
+        .sort((a, b) => Number(a.periodo_meses) - Number(b.periodo_meses));
+
+      if (ordenado.length === 0) {
+        Plotly.purge(divId);
+        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;line-height:1.45;">Sem dados disponíveis para calcular a participação da depreciação no custo mensal. É necessário ter depreciação estimada e custo mensal total para o mesmo ciclo.</div>';
+        return;
+      }
+
+      const x = ordenado.map(d => Number(d.periodo_meses));
+      const y = ordenado.map(d => Number(d.participacao_depreciacao_custo));
+      const labels = y.map(v => numeroBR(v, "percentual"));
+      const custom = ordenado.map(d => [
+        numeroBR(Number(d.depreciacao_mensal_calculada), "moeda"),
+        numeroBR(Number(d.valor_mensal_total_esperado), "moeda")
+      ]);
+      const maxY = Math.max(...y);
+
+      const trace = {
+        type: "bar",
+        x,
+        y,
+        text: labels,
+        textposition: "outside",
+        marker: { color: "#8e44ad" },
+        cliponaxis: false,
+        customdata: custom,
+        hovertemplate: "Período: %{x} meses<br>Participação: %{text}<br>Depreciação mensal: %{customdata[0]}<br>Custo mensal total: %{customdata[1]}<extra></extra>"
+      };
+
+      const layout = layoutBase("Participação da depreciação no custo mensal", "Período de troca (meses)", "Depreciação / custo mensal (%)", 420);
+      layout.xaxis.tickmode = "array";
+      layout.xaxis.tickvals = [12, 24, 36, 48, 60];
+      layout.yaxis.range = [0, Math.min(100, maxY * 1.22)];
+      Plotly.newPlot(divId, [trace], layout, plotConfig);
+    }
+
     function plotCategoria(divId, df, coluna, titulo, eixoX, percentual = false, maiorMelhor = false) {
       let ordenado = [...df].filter(d => valorValido(d[coluna]));
       ordenado = ordenado.sort((a, b) => Number(a[coluna]) - Number(b[coluna]));
@@ -1127,6 +1387,10 @@
 
       const x = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
       const y = ordenado.map(d => d.veiculo);
+      const selecionado = ordenado.map(d => d.veiculo === ids.veiculo.value);
+      const posicaoSelecionado = ordenado.findIndex(d => d.veiculo === ids.veiculo.value) + 1;
+      const totalRanking = ordenado.length;
+      const rankingSelecionado = posicaoSelecionado > 0 ? `${ordinalBR(posicaoSelecionado)} de ${totalRanking}` : "";
       const cores = ordenado.map(d => {
         if (d.veiculo !== ids.veiculo.value) return "lightgray";
         return coluna === "eer_calculada" ? corEER(Number(d[coluna])) : "#d71920";
@@ -1134,8 +1398,13 @@
       const tipoLabel = coluna === "perc_fipe_0km_requerido_mes" ? "percentual" : coluna === "valor_mensal_total_esperado" ? "moeda" : coluna === "eer_calculada" ? "percentual" : "normal";
       const labels = x.map(v => numeroBR(v, tipoLabel));
       const classes = ordenado.map(d => coluna === "eer_calculada" ? classeEER(Number(d[coluna])) : "");
+      const custom = ordenado.map((d, i) => [
+        classes[i],
+        selecionado[i] ? rankingSelecionado : "",
+        labels[i]
+      ]);
 
-      const trace = {
+      const traceValores = {
         type: "bar",
         orientation: "h",
         x,
@@ -1144,37 +1413,35 @@
         textposition: "outside",
         marker: { color: cores },
         cliponaxis: false,
-        customdata: classes,
+        customdata: custom,
         hovertemplate: coluna === "eer_calculada"
-          ? "%{y}<br>EER: %{text}<br>Classe: %{customdata}<extra></extra>"
-          : "%{y}<br>Valor: %{text}<extra></extra>"
+          ? "%{y}<br>EER: %{customdata[2]}<br>Ranking: %{customdata[1]}<br>Classe: %{customdata[0]}<extra></extra>"
+          : "%{y}<br>Valor: %{customdata[2]}<br>Ranking: %{customdata[1]}<extra></extra>"
+      };
+
+      const traceRankingSelecionado = {
+        type: "bar",
+        orientation: "h",
+        x: x.map((v, i) => selecionado[i] ? v : 0),
+        y,
+        text: selecionado.map(v => v ? rankingSelecionado : ""),
+        textposition: "inside",
+        insidetextanchor: "middle",
+        textfont: { color: "white", size: isMobile() ? 10 : 12, family: "Arial, sans-serif" },
+        marker: { color: "rgba(0,0,0,0)" },
+        hoverinfo: "skip",
+        showlegend: false,
+        cliponaxis: false
       };
 
       const altura = Math.min(680, Math.max(420, 27 * ordenado.length));
       const layout = layoutBase(titulo, eixoX, "", altura);
       layout.margin.l = window.innerWidth < 800 ? 120 : 230;
-      layout.margin.r = isMobile() ? 35 : 70;
+      layout.margin.r = isMobile() ? 45 : 80;
       layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 }, fixedrange: true };
       layout.xaxis.range = [0, Math.max(...x) * 1.22];
-
-      const idxSelecionado = ordenado.findIndex(d => d.veiculo === ids.veiculo.value);
-      if (idxSelecionado >= 0) {
-        layout.annotations = [
-          {
-            x: x[idxSelecionado] * 0.5,
-            y: y[idxSelecionado],
-            text: `${idxSelecionado + 1}º/${ordenado.length}`,
-            showarrow: false,
-            font: { color: "white", size: isMobile() ? 10 : 12, family: "Arial, sans-serif" },
-            bgcolor: "rgba(0,0,0,0.28)",
-            bordercolor: "rgba(255,255,255,0.55)",
-            borderwidth: 1,
-            borderpad: 3
-          }
-        ];
-      }
-
-      Plotly.newPlot(divId, [trace], layout, plotConfig);
+      layout.barmode = "overlay";
+      Plotly.newPlot(divId, [traceValores, traceRankingSelecionado], layout, plotConfig);
     }
 
     function plotGeralEER(divId, df, titulo) {
@@ -1189,6 +1456,9 @@
 
       const x = ordenado.map(d => Number(d.eer_calculada));
       const selecionado = ordenado.map(d => d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value);
+      const posicaoSelecionado = selecionado.findIndex(v => v) + 1;
+      const totalRanking = ordenado.length;
+      const rankingSelecionado = posicaoSelecionado > 0 ? `${ordinalBR(posicaoSelecionado)} de ${totalRanking}` : "";
       const y = ordenado.map((d, i) => `linha_${i}`);
       const rotulosY = ordenado.map(d => {
         const nome = d.veiculo;
@@ -1200,9 +1470,15 @@
       const cores = ordenado.map(d => corEER(Number(d.eer_calculada)));
       const labels = ordenado.map(d => numeroBR(Number(d.eer_calculada), "percentual"));
       const classes = ordenado.map(d => classeEER(Number(d.eer_calculada)));
-      const custom = ordenado.map(d => [d.categoria, d.marca, classeEER(Number(d.eer_calculada)), d.veiculo]);
+      const custom = ordenado.map((d, i) => [
+        d.categoria,
+        d.marca,
+        classeEER(Number(d.eer_calculada)),
+        d.veiculo,
+        selecionado[i] ? rankingSelecionado : ""
+      ]);
 
-      const trace = {
+      const traceValores = {
         type: "bar",
         orientation: "h",
         x,
@@ -1218,7 +1494,22 @@
         },
         cliponaxis: false,
         customdata: custom,
-        hovertemplate: "Veículo: %{customdata[3]}<br>Categoria: %{customdata[0]}<br>EER: %{x:.2f}%<br>Classe: %{customdata[2]}<extra></extra>"
+        hovertemplate: "Veículo: %{customdata[3]}<br>Categoria: %{customdata[0]}<br>EER: %{x:.2f}%<br>Ranking: %{customdata[4]}<br>Classe: %{customdata[2]}<extra></extra>"
+      };
+
+      const traceRankingSelecionado = {
+        type: "bar",
+        orientation: "h",
+        x: x.map((v, i) => selecionado[i] ? v : 0),
+        y,
+        text: selecionado.map(v => v ? rankingSelecionado : ""),
+        textposition: "inside",
+        insidetextanchor: "middle",
+        textfont: { color: "white", size: isMobile() ? 10 : 12, family: "Arial, sans-serif" },
+        marker: { color: "rgba(0,0,0,0)" },
+        hoverinfo: "skip",
+        showlegend: false,
+        cliponaxis: false
       };
 
       const altura = Math.min(980, Math.max(520, 23 * ordenado.length));
@@ -1234,25 +1525,8 @@
         ticktext: rotulosY
       };
       layout.xaxis.range = [0, Math.max(...x) * 1.18];
-
-      const idxSelecionado = selecionado.findIndex(v => v);
-      if (idxSelecionado >= 0) {
-        layout.annotations = [
-          {
-            x: x[idxSelecionado] * 0.5,
-            y: y[idxSelecionado],
-            text: `${idxSelecionado + 1}º/${ordenado.length}`,
-            showarrow: false,
-            font: { color: "white", size: isMobile() ? 10 : 12, family: "Arial, sans-serif" },
-            bgcolor: "rgba(0,0,0,0.28)",
-            bordercolor: "rgba(255,255,255,0.55)",
-            borderwidth: 1,
-            borderpad: 3
-          }
-        ];
-      }
-
-      Plotly.newPlot(divId, [trace], layout, plotConfig);
+      layout.barmode = "overlay";
+      Plotly.newPlot(divId, [traceValores, traceRankingSelecionado], layout, plotConfig);
     }
 
     function plotEstados(divId, df, titulo, eixoX) {
@@ -1331,6 +1605,8 @@
 
       plotPeriodos("grafico-fipe-periodos", dfVeic, "perc_fipe_0km_requerido_mes", "% FIPE zero-km requerido ao mês", "% da FIPE zero-km / mês", true);
       plotPeriodos("grafico-custo-periodos", dfVeic, "valor_mensal_total_esperado", "Custo real mensal estimado", "R$ por mês", false);
+      plotDepreciacaoPeriodos("grafico-depreciacao-periodos", dfVeic);
+      plotParticipacaoDepreciacaoPeriodos("grafico-participacao-depreciacao-periodos", dfVeic);
       plotPeriodos("grafico-eer-periodos", dfVeic, "eer_calculada", "Índice de Eficiência Econômica de Reposição - EER", "EER (%)", false);
 
       const existePeriodo = dfVeic.some(d =>
