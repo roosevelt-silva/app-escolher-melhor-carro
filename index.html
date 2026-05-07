@@ -1290,7 +1290,7 @@
         plotCategoria("grafico-fipe-categoria", dfCatPeriodo, "perc_fipe_0km_requerido_mes", tituloCategoria("% FIPE zero-km requerido ao mês", periodo, "fipe"), "% da FIPE zero-km / mês", true, false);
         plotCategoria("grafico-custo-categoria", dfCatPeriodo, "valor_mensal_total_esperado", tituloCategoria("Custo real mensal estimado", periodo, "custo"), "R$ por mês", false, false);
         plotCustoAcumuladoCategoria(dfCatPeriodo, periodo);
-        plotCategoria("grafico-eer-categoria", dfCatPeriodo, "eer_calculada", tituloCategoria("Índice de Eficiência de Troca - EER", periodo, "eer"), "EER (%)", false, true);
+        plotCategoria("grafico-eer-categoria", dfCatPeriodo, "eer_calculada", tituloCategoria("Índice de Eficiência Econômica de Reposição - EER", periodo, "eer"), "EER (%)", false, true);
       }
 
       const dfEstados = dados.filter(d =>
