@@ -710,7 +710,7 @@
             <div class="campeao-trofeu">🏆</div>
             <div>
               <div class="campeao-titulo">Maior eficiência econômica da categoria</div>
-              <div class="campeao-subtitulo">Modelo com melhor EER entre todos os veículos da categoria, na UF selecionada, sem restringir pela marca escolhida.</div>
+              <div class="campeao-subtitulo">Modelo com melhor EER da categoria na UF selecionada, considerando o melhor ciclo disponível para cada veículo.</div>
             </div>
           </div>
 
@@ -1545,20 +1545,30 @@
         ids.cardEstadoMaisBaratoDetalhe.textContent = "Sem dados para comparar UFs no ciclo de 24 meses.";
       }
 
-      const periodoCampeao = 24;
-      // Campeão da CATEGORIA na UF selecionada.
+      // Campeão da CATEGORIA na UF selecionada, considerando o melhor ciclo disponível.
       // Importante: não usa ids.marca nem ids.veiculo; portanto não fica preso à marca/modelo escolhido no filtro.
-      const candidatosCampeao = dados
+      // Para cada veículo, primeiro seleciona o ciclo com maior EER; depois escolhe o maior EER da categoria.
+      const melhoresPorVeiculo = new Map();
+      dados
         .filter(d =>
           d.uf === ids.uf.value &&
           d.categoria === ids.categoria.value &&
-          Number(d.periodo_meses) === periodoCampeao &&
-          valorValido(d.eer_calculada)
+          valorValido(d.eer_calculada) &&
+          valorValido(d.periodo_meses)
         )
+        .forEach(d => {
+          const atual = melhoresPorVeiculo.get(d.veiculo);
+          if (!atual || Number(d.eer_calculada) > Number(atual.eer_calculada)) {
+            melhoresPorVeiculo.set(d.veiculo, d);
+          }
+        });
+
+      const candidatosCampeao = [...melhoresPorVeiculo.values()]
         .sort((a, b) => Number(b.eer_calculada) - Number(a.eer_calculada));
 
       if (candidatosCampeao.length > 0) {
         const campeao = candidatosCampeao[0];
+        const periodoCampeao = Number(campeao.periodo_meses);
         ids.cardCampeaoVeiculo.textContent = campeao.veiculo;
         ids.cardCampeaoEER.textContent = numeroBR(Number(campeao.eer_calculada), "percentual");
         ids.cardCampeaoCiclo.textContent = `${periodoCampeao} meses`;
@@ -1568,7 +1578,7 @@
       } else {
         ids.cardCampeaoVeiculo.textContent = "—";
         ids.cardCampeaoEER.textContent = "—";
-        ids.cardCampeaoCiclo.textContent = `${periodoCampeao} meses`;
+        ids.cardCampeaoCiclo.textContent = "—";
         ids.cardCampeaoCusto.textContent = "—";
       }
 
