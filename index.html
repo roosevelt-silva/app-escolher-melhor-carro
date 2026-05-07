@@ -849,9 +849,11 @@
     function plotCustoAcumuladoCategoria(dfVeic) {
       const melhor = melhorRegistroVeiculo(dfVeic);
       const divId = "grafico-custo-acumulado-categoria";
+      const div = document.getElementById(divId);
+
       if (!melhor || !valorValido(melhor.periodo_meses)) {
         Plotly.purge(divId);
-        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para calcular o custo acumulado.</div>';
+        div.innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados disponíveis para calcular o custo acumulado.</div>';
         return;
       }
 
@@ -871,28 +873,29 @@
 
       if (base.length === 0) {
         Plotly.purge(divId);
-        document.getElementById(divId).innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados da categoria para o melhor ciclo encontrado.</div>';
+        div.innerHTML = '<div style="padding:16px;color:#52606d;font-weight:700;">Sem dados da categoria para o melhor ciclo encontrado.</div>';
         return;
       }
 
       const selecionadoIndex = base.findIndex(d => d.veiculo === ids.veiculo.value);
-      const x = base.map(d => d.veiculo);
-      const y = base.map(d => Number(d.custo_acumulado));
-      const nomes = base.map(d => d.veiculo);
+      const x = base.map(d => Number(d.custo_acumulado));
+      const y = base.map(d => d.veiculo);
       const cores = base.map(d => d.veiculo === ids.veiculo.value ? "#d71920" : "#9bb7d4");
-      const acumuladoSelecionado = selecionadoIndex >= 0 ? y[selecionadoIndex] : null;
-      const posicao = selecionadoIndex >= 0 ? selecionadoIndex + 1 : null;
-      const custom = base.map(d => [d.veiculo, numeroBR(Number(d.custo_acumulado), "moeda"), numeroBR(Number(d.valor_mensal_total_esperado), "moeda"), periodo]);
+      const labels = base.map(d => numeroBR(Number(d.custo_acumulado), "moeda"));
+      const custom = base.map(d => [
+        d.veiculo,
+        numeroBR(Number(d.custo_acumulado), "moeda"),
+        numeroBR(Number(d.valor_mensal_total_esperado), "moeda"),
+        periodo
+      ]);
 
       const trace = {
         type: "bar",
+        orientation: "h",
         x,
         y,
-        text: nomes,
-        textposition: "inside",
-        textangle: -90,
-        insidetextanchor: "middle",
-        textfont: { color: "white", size: isMobile() ? 8 : 10 },
+        text: labels,
+        textposition: "outside",
         marker: {
           color: cores,
           line: {
@@ -900,59 +903,83 @@
             color: base.map(d => d.veiculo === ids.veiculo.value ? "#8b0000" : "rgba(0,0,0,0)")
           }
         },
+        cliponaxis: false,
         customdata: custom,
         hovertemplate: "%{customdata[0]}<br>Custo acumulado: %{customdata[1]}<br>Custo mensal: %{customdata[2]}<br>Ciclo: %{customdata[3]} meses<extra></extra>"
       };
 
-      const annotations = [];
-      if (selecionadoIndex >= 0) {
-        annotations.push({
-          x: x[selecionadoIndex],
-          y: y[selecionadoIndex],
-          text: `Seu veículo<br>${ordinalBR(posicao)} menor custo<br>${numeroBR(acumuladoSelecionado, "moeda")}`,
-          showarrow: true,
-          arrowhead: 2,
-          ax: 0,
-          ay: -70,
-          bgcolor: "#ffffff",
-          bordercolor: "#d71920",
-          borderwidth: 1,
-          borderpad: 6,
-          font: { color: "#d71920", size: isMobile() ? 10 : 12 }
-        });
-      }
+      const tickText = base.map(d => {
+        if (d.veiculo === ids.veiculo.value) {
+          return `<span style="color:#d71920;font-weight:700;">${d.veiculo}</span>`;
+        }
+        return d.veiculo;
+      });
 
+      const altura = Math.min(820, Math.max(isMobile() ? 520 : 470, 34 * base.length + 170));
+      const maxX = Math.max(...x);
       const layout = {
         title: {
           text: isMobile()
-            ? `Custo acumulado<br>(${periodo} meses)`
-            : `Custo acumulado no melhor ciclo do veículo selecionado (${periodo} meses)`,
+            ? `Custo acumulado no melhor ciclo<br>comparativo na categoria (${periodo} meses)`
+            : `Custo acumulado no melhor ciclo — comparativo na categoria (${periodo} meses)`,
           font: { size: isMobile() ? 13 : 16 },
           x: 0.5,
           xanchor: "center"
         },
-        height: isMobile() ? 520 : 470,
-        margin: { l: isMobile() ? 70 : 85, r: isMobile() ? 20 : 35, t: 80, b: isMobile() ? 30 : 45 },
-        xaxis: {
-          title: "",
-          showticklabels: false,
-          fixedrange: true,
-          automargin: true
+        height: altura,
+        margin: {
+          l: isMobile() ? 155 : 280,
+          r: isMobile() ? 55 : 115,
+          t: isMobile() ? 85 : 70,
+          b: 65
         },
-        yaxis: {
+        xaxis: {
           title: "Custo acumulado (R$)",
           tickprefix: "R$ ",
           tickformat: ",.0f",
           gridcolor: "#e4e7eb",
           fixedrange: true,
-          rangemode: "tozero"
+          rangemode: "tozero",
+          range: [0, maxX * 1.22],
+          automargin: true
+        },
+        yaxis: {
+          title: "",
+          automargin: true,
+          tickmode: "array",
+          tickvals: y,
+          ticktext: tickText,
+          tickfont: { size: isMobile() ? 9 : 11 },
+          fixedrange: true,
+          autorange: "reversed"
         },
         font: { family: "Arial, sans-serif", size: 12 },
         paper_bgcolor: "white",
         plot_bgcolor: "white",
         dragmode: false,
         showlegend: false,
-        annotations
+        annotations: [
+          {
+            x: 0,
+            y: -0.18,
+            xref: "paper",
+            yref: "paper",
+            text: "Menor custo acumulado",
+            showarrow: false,
+            font: { color: "#0f9d58", size: isMobile() ? 10 : 12 },
+            xanchor: "left"
+          },
+          {
+            x: 1,
+            y: -0.18,
+            xref: "paper",
+            yref: "paper",
+            text: "Maior custo acumulado",
+            showarrow: false,
+            font: { color: "#d71920", size: isMobile() ? 10 : 12 },
+            xanchor: "right"
+          }
+        ]
       };
 
       Plotly.newPlot(divId, [trace], layout, plotConfig);
