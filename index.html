@@ -1219,12 +1219,12 @@
 
       const trace = {
         type: "bar",
-        showlegend: false,
         orientation: "h",
         x,
         y,
         text: labels,
         textposition: "outside",
+        showlegend: false,
         marker: {
           color: cores,
           line: {
@@ -1458,7 +1458,6 @@
 
       const trace = {
         type: "bar",
-        showlegend: false,
         x,
         y,
         text: labels,
@@ -1474,7 +1473,6 @@
       layout.xaxis.tickmode = "array";
       layout.xaxis.tickvals = [12, 24, 36, 48, 60];
       layout.yaxis.range = [0, maxY * 1.22];
-      layout.showlegend = false;
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
@@ -1498,7 +1496,6 @@
 
       const trace = {
         type: "bar",
-        showlegend: false,
         x,
         y,
         text: labels,
@@ -1512,7 +1509,6 @@
       layout.xaxis.tickmode = "array";
       layout.xaxis.tickvals = [12, 24, 36, 48, 60];
       layout.yaxis.range = [0, maxY * 1.22];
-      layout.showlegend = false;
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
@@ -1546,7 +1542,6 @@
 
       const trace = {
         type: "bar",
-        showlegend: false,
         x,
         y,
         text: labels,
@@ -1561,7 +1556,6 @@
       layout.xaxis.tickmode = "array";
       layout.xaxis.tickvals = [12, 24, 36, 48, 60];
       layout.yaxis.range = [0, Math.min(100, maxY * 1.22)];
-      layout.showlegend = false;
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
@@ -1577,11 +1571,23 @@
       }
 
       const x = ordenado.map(d => percentual ? Number(d[coluna]) * 100 : Number(d[coluna]));
-      const y = ordenado.map(d => d.veiculo);
+      const y = ordenado.map((d, i) => `linha_${i}`);
       const selecionado = ordenado.map(d => d.veiculo === ids.veiculo.value);
       const posicaoSelecionado = ordenado.findIndex(d => d.veiculo === ids.veiculo.value) + 1;
       const totalRanking = ordenado.length;
       const rankingSelecionado = posicaoSelecionado > 0 ? `${ordinalBR(posicaoSelecionado)} de ${totalRanking}` : "";
+      const destaqueRanking = posicaoSelecionado > 0
+        ? `${posicaoSelecionado <= 3 ? (posicaoSelecionado === 1 ? "🏆 " : posicaoSelecionado === 2 ? "🥈 " : "🥉 ") : ""}${rankingSelecionado}`
+        : "";
+
+      const rotulosY = ordenado.map((d, i) => {
+        const nome = d.veiculo;
+        if (selecionado[i]) {
+          return `<span style="color:#00A63E;font-weight:800;">${nome} — ${destaqueRanking}</span>`;
+        }
+        return nome;
+      });
+
       const cores = ordenado.map(d => {
         if (d.veiculo !== ids.veiculo.value) return "lightgray";
         return coluna === "eer_calculada" ? corEER(Number(d[coluna])) : "#d71920";
@@ -1592,50 +1598,41 @@
       const custom = ordenado.map((d, i) => [
         classes[i],
         selecionado[i] ? rankingSelecionado : "",
-        labels[i]
+        labels[i],
+        d.veiculo
       ]);
 
       const traceValores = {
         type: "bar",
-        showlegend: false,
         orientation: "h",
         x,
         y,
         text: labels,
         textposition: "outside",
+        showlegend: false,
         marker: { color: cores },
         cliponaxis: false,
         customdata: custom,
         hovertemplate: coluna === "eer_calculada"
-          ? "%{y}<br>EER: %{customdata[2]}<br>Ranking: %{customdata[1]}<br>Classe: %{customdata[0]}<extra></extra>"
-          : "%{y}<br>Valor: %{customdata[2]}<br>Ranking: %{customdata[1]}<extra></extra>"
-      };
-
-      const traceRankingSelecionado = {
-        type: "bar",
-        showlegend: false,
-        orientation: "h",
-        x: x.map((v, i) => selecionado[i] ? v : 0),
-        y,
-        text: selecionado.map(v => v ? rankingSelecionado : ""),
-        textposition: "inside",
-        insidetextanchor: "middle",
-        textfont: { color: "white", size: isMobile() ? 18 : 24, family: "Arial, sans-serif", weight: 900 },
-        marker: { color: "rgba(0,0,0,0)" },
-        hoverinfo: "skip",
-        showlegend: false,
-        cliponaxis: false
+          ? "%{customdata[3]}<br>EER: %{customdata[2]}<br>Ranking: %{customdata[1]}<br>Classe: %{customdata[0]}<extra></extra>"
+          : "%{customdata[3]}<br>Valor: %{customdata[2]}<br>Ranking: %{customdata[1]}<extra></extra>"
       };
 
       const altura = Math.min(680, Math.max(420, 27 * ordenado.length));
       const layout = layoutBase(titulo, eixoX, "", altura);
-      layout.margin.l = window.innerWidth < 800 ? 120 : 230;
+      layout.margin.l = window.innerWidth < 800 ? 150 : 300;
       layout.margin.r = isMobile() ? 45 : 80;
-      layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 }, fixedrange: true };
+      layout.yaxis = {
+        automargin: true,
+        tickfont: { size: window.innerWidth < 800 ? 9 : 11 },
+        fixedrange: true,
+        tickmode: "array",
+        tickvals: y,
+        ticktext: rotulosY
+      };
       layout.xaxis.range = [0, Math.max(...x) * 1.22];
-      layout.barmode = "overlay";
       layout.showlegend = false;
-      Plotly.newPlot(divId, [traceValores, traceRankingSelecionado], layout, plotConfig);
+      Plotly.newPlot(divId, [traceValores], layout, plotConfig);
     }
 
     function plotGeralEER(divId, df, titulo) {
@@ -1653,11 +1650,14 @@
       const posicaoSelecionado = selecionado.findIndex(v => v) + 1;
       const totalRanking = ordenado.length;
       const rankingSelecionado = posicaoSelecionado > 0 ? `${ordinalBR(posicaoSelecionado)} de ${totalRanking}` : "";
+      const destaqueRanking = posicaoSelecionado > 0
+        ? `${posicaoSelecionado <= 3 ? (posicaoSelecionado === 1 ? "🏆 " : posicaoSelecionado === 2 ? "🥈 " : "🥉 ") : ""}${rankingSelecionado}`
+        : "";
       const y = ordenado.map((d, i) => `linha_${i}`);
-      const rotulosY = ordenado.map(d => {
+      const rotulosY = ordenado.map((d, i) => {
         const nome = d.veiculo;
-        if (d.categoria === ids.categoria.value && d.veiculo === ids.veiculo.value) {
-          return `<span style="color:#00C853; font-weight:700;">${nome}</span>`;
+        if (selecionado[i]) {
+          return `<span style="color:#00C853; font-weight:800;">${nome} — ${destaqueRanking}</span>`;
         }
         return nome;
       });
@@ -1674,12 +1674,12 @@
 
       const traceValores = {
         type: "bar",
-        showlegend: false,
         orientation: "h",
         x,
         y,
         text: labels,
         textposition: "outside",
+        showlegend: false,
         marker: {
           color: cores,
           line: {
@@ -1692,25 +1692,9 @@
         hovertemplate: "Veículo: %{customdata[3]}<br>Categoria: %{customdata[0]}<br>EER: %{x:.2f}%<br>Ranking: %{customdata[4]}<br>Classe: %{customdata[2]}<extra></extra>"
       };
 
-      const traceRankingSelecionado = {
-        type: "bar",
-        showlegend: false,
-        orientation: "h",
-        x: x.map((v, i) => selecionado[i] ? v : 0),
-        y,
-        text: selecionado.map(v => v ? rankingSelecionado : ""),
-        textposition: "inside",
-        insidetextanchor: "middle",
-        textfont: { color: "white", size: isMobile() ? 32 : 44, family: "Arial, sans-serif", weight: 900 },
-        marker: { color: "rgba(0,0,0,0)" },
-        hoverinfo: "skip",
-        showlegend: false,
-        cliponaxis: false
-      };
-
       const altura = Math.min(980, Math.max(520, 23 * ordenado.length));
       const layout = layoutBase(titulo, "EER (%)", "", altura);
-      layout.margin.l = window.innerWidth < 800 ? 150 : 280;
+      layout.margin.l = window.innerWidth < 800 ? 170 : 330;
       layout.margin.r = isMobile() ? 70 : 130;
       layout.yaxis = {
         automargin: true,
@@ -1721,9 +1705,8 @@
         ticktext: rotulosY
       };
       layout.xaxis.range = [0, Math.max(...x) * 1.18];
-      layout.barmode = "overlay";
       layout.showlegend = false;
-      Plotly.newPlot(divId, [traceValores, traceRankingSelecionado], layout, plotConfig);
+      Plotly.newPlot(divId, [traceValores], layout, plotConfig);
     }
 
     function plotEstados(divId, df, titulo, eixoX) {
@@ -1744,7 +1727,6 @@
 
       const trace = {
         type: "bar",
-        showlegend: false,
         orientation: "h",
         x,
         y,
@@ -1761,7 +1743,6 @@
       layout.margin.r = isMobile() ? 35 : 90;
       layout.yaxis = { automargin: true, tickfont: { size: window.innerWidth < 800 ? 9 : 11 }, fixedrange: true };
       layout.xaxis.range = [0, Math.max(...x) * 1.22];
-      layout.showlegend = false;
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
 
