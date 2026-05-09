@@ -1659,14 +1659,15 @@
 
     function plotDepreciacaoPeriodos(divId, df) {
       const ordenado = [...df]
+        .filter(d => valorValido(d.periodo_meses) && valorValido(d.valor_mensal_total_esperado))
         .map(d => ({ ...d, depreciacao_calculada: calcularDepreciacaoRegistro(d) }))
-        .filter(d => valorValido(d.periodo_meses) && valorValido(d.depreciacao_calculada))
+        .filter(d => valorValido(d.depreciacao_calculada))
         .sort((a, b) => Number(a.periodo_meses) - Number(b.periodo_meses));
 
       if (ordenado.length === 0) {
         Plotly.purge(divId);
         const chavesDetectadas = df.length ? chavesNumericasFIPE(df[0]).join(', ') : '';
-        document.getElementById(divId).innerHTML = `<div style="padding:16px;color:#52606d;font-weight:700;line-height:1.45;">Sem dados disponíveis para calcular a depreciação. Colunas FIPE numéricas detectadas nesta seleção: ${chavesDetectadas || 'nenhuma'}.</div>`;
+        document.getElementById(divId).innerHTML = `<div style="padding:16px;color:#52606d;font-weight:700;line-height:1.45;">Sem dados disponíveis para calcular a depreciação nos ciclos com custo mensal estimado. Colunas FIPE numéricas detectadas nesta seleção: ${chavesDetectadas || 'nenhuma'}.</div>`;
         return;
       }
 
