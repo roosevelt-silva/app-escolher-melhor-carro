@@ -755,7 +755,7 @@
       <div id="grafico-fipe-periodos" class="grafico"></div>
 
       <h3>Depreciação estimada pela Tabela FIPE</h3>
-      <p class="explica">Mostra a perda estimada de valor do veículo em relação ao preço FIPE zero-quilômetro, considerando apenas os ciclos que também possuem custo mensal estimado. Quanto menor a depreciação acumulada, menor tende a ser a perda patrimonial no período.</p>
+      <p class="explica">Mostra a perda estimada de valor do veículo em relação ao preço FIPE zero-quilômetro, considerando cada ciclo de troca. Quanto menor a depreciação acumulada, menor tende a ser a perda patrimonial no período.</p>
       <div id="grafico-depreciacao-periodos" class="grafico"></div>
 
       <h3>Participação da depreciação no custo mensal</h3>
@@ -1020,10 +1020,18 @@
       );
     }
 
+    
+    function subtituloVeiculo() {
+      return ids.veiculo && ids.veiculo.value
+        ? `<span style="font-size:${isMobile() ? 11 : 12}px;color:#52606d;font-weight:500;"><br>${ids.veiculo.value}</span>`
+        : "";
+    }
+
+
     function layoutBase(titulo, eixoX, eixoY, altura = 420) {
       return {
         title: {
-          text: titulo,
+          text: titulo + subtituloVeiculo(),
           font: { size: isMobile() ? 13 : 17 },
           x: 0.5,
           xanchor: "center"
@@ -1650,17 +1658,7 @@
     }
 
     function plotDepreciacaoPeriodos(divId, df) {
-      // A depreciação só deve ser exibida nos mesmos ciclos em que há custo mensal estimado.
-      // Isso evita mostrar depreciação calculada a partir de FIPE projetada/estimada em períodos
-      // que não entram no modelo de custo real mensal.
-      const periodosComCustoMensal = new Set(
-        df
-          .filter(d => valorValido(d.periodo_meses) && valorValido(d.valor_mensal_total_esperado))
-          .map(d => Number(d.periodo_meses))
-      );
-
       const ordenado = [...df]
-        .filter(d => periodosComCustoMensal.has(Number(d.periodo_meses)))
         .map(d => ({ ...d, depreciacao_calculada: calcularDepreciacaoRegistro(d) }))
         .filter(d => valorValido(d.periodo_meses) && valorValido(d.depreciacao_calculada))
         .sort((a, b) => Number(a.periodo_meses) - Number(b.periodo_meses));
@@ -1690,7 +1688,7 @@
 
       const layout = layoutBase("Depreciação estimada pela FIPE", "Período de troca (meses)", "Depreciação acumulada (%)", 420);
       layout.xaxis.tickmode = "array";
-      layout.xaxis.tickvals = x;
+      layout.xaxis.tickvals = [12, 24, 36, 48, 60];
       layout.yaxis.range = [0, maxY * 1.22];
       Plotly.newPlot(divId, [trace], layout, plotConfig);
     }
